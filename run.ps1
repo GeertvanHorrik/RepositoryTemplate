@@ -50,7 +50,7 @@ foreach ($potentialGitRepository in $gitRepositories)
             continue
         }
 
-        Write-Host "Creating '$($targetFileName)'"
+        # Write-Host "Creating '$($targetFileName)'"
 
         if (![System.IO.Directory]::Exists($targetDirectoryName))
         {
@@ -76,7 +76,7 @@ foreach ($potentialGitRepository in $gitRepositories)
             continue
         }
 
-        Write-Host "Replacing $($targetFileName)"
+        # Write-Host "Replacing $($targetFileName)"
 
         Copy-Item -Path $fileToReplace.FullName -Destination $targetFileName -force
     }
