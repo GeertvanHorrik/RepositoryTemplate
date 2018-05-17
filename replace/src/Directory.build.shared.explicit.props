@@ -137,6 +137,6 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'monoandroid70' ">
     <Compile Include="Platforms\xamarin.android\**\*.cs" />
     <Page Include="Platforms\xamarin.android\**\*.xaml" SubType="Designer" Generator="MSBuild:Compile" />
-    <Compile Update="Platforms\xamarin.ioandroids\**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
+    <Compile Update="Platforms\xamarin.ioandroid\**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
   </ItemGroup>
 </Project>
