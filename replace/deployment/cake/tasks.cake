@@ -127,6 +127,12 @@ Task("CodeSign")
     .ContinueOnError()
     .Does(() =>
 {
+    if (isCiBuild)
+    {
+        Information("Skipping code signing because this is a CI build");
+        return;
+    }
+
     var exeSignFilesSearchPattern = outputRootDirectory + string.Format("/**/*{0}*.exe", codeSignWildCard);
     var dllSignFilesSearchPattern = outputRootDirectory + string.Format("/**/*{0}*.dll", codeSignWildCard);
 
