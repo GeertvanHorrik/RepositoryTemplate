@@ -146,7 +146,7 @@ Task("CodeSign")
 
     filesToSign.AddRange(GetFiles(dllSignFilesSearchPattern));
 
-    Information("Found '{0}' files to code sign", filesToSign.Count);
+    Information("Found '{0}' files to code sign, this can take a few minutes", filesToSign.Count);
 
     Sign(filesToSign, new SignToolSignSettings 
     {
