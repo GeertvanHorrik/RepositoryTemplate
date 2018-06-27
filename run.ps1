@@ -2,6 +2,10 @@
 $templateRootDirectory = $PSScriptRoot
 $replaceRootDirectory = "C:\Source\"
 
+[bool] $enableDelete = $false
+[bool] $enableCreate = $false
+[bool] $enableReplace = $true
+
 # =================== CONSTANTS ========================
 
 $deleteDirectoryName = "delete"
@@ -39,69 +43,84 @@ foreach ($potentialGitRepository in $gitRepositories)
     Write-Host "Updating files for repository '$($gitRepositoryDirectory)'"
 
     # Delete
-    foreach ($fileToDelete in $deleteTemplateFiles)
+    if ($enableDelete)
     {
-        $relativeFileName = $fileToDelete.FullName.Replace("$($templateRootDirectory)\$($deleteDirectoryName)", "")
-        $targetFileName = Join-Path $gitRepositoryDirectory $relativeFileName
-        
-        # Write-Host "$($fileToDelete.FullName) => $($targetFileName))"
+        #Write-Host "Delete is enabled, checking for files to delete";
 
-        # Only delete if exists
-        if (![System.IO.File]::Exists($targetFileName))
+        foreach ($fileToDelete in $deleteTemplateFiles)
         {
-            continue
+            $relativeFileName = $fileToDelete.FullName.Replace("$($templateRootDirectory)\$($deleteDirectoryName)", "")
+            $targetFileName = Join-Path $gitRepositoryDirectory $relativeFileName
+        
+            # Write-Host "$($fileToDelete.FullName) => $($targetFileName))"
+
+            # Only delete if exists
+            if (![System.IO.File]::Exists($targetFileName))
+            {
+                continue
+            }
+
+            Write-Host "Deleting '$($targetFileName)'"
+
+            Write-Host "[DELETING IS DISABLED, UNCOMMENT THE NEXT LINE IN THE SCRIPT TO ENABLE DELETING, USE AT YOUR OWN RISK]"
+            #Remove-Item -Path $targetFileName -Force
         }
-
-        Write-Host "Deleting '$($targetFileName)'"
-
-        Write-Host "[DELETING IS DISABLED, UNCOMMENT THE NEXT LINE IN THE SCRIPT TO ENABLE DELETING, USE AT YOUR OWN RISK]"
-        # Delete-Item -Path $fileToCreate.FullName -Force
     }
 
     # Create
-    foreach ($fileToCreate in $createTemplateFiles)
+    if ($enableCreate)
     {
-        $relativeFileName = $fileToCreate.FullName.Replace("$($templateRootDirectory)\$($createDirectoryName)", "")
-        $targetFileName = Join-Path $gitRepositoryDirectory $relativeFileName
-        $targetDirectoryName = [System.IO.Path]::GetDirectoryName($targetFileName)
+        #Write-Host "Create is enabled, checking for files to create";
 
-        # Write-Host "$($fileToCreate.FullName) => $($targetFileName))"
-
-        # Only create, not overwrite
-        if ([System.IO.File]::Exists($targetFileName))
+        foreach ($fileToCreate in $createTemplateFiles)
         {
-            continue
+            $relativeFileName = $fileToCreate.FullName.Replace("$($templateRootDirectory)\$($createDirectoryName)", "")
+            $targetFileName = Join-Path $gitRepositoryDirectory $relativeFileName
+            $targetDirectoryName = [System.IO.Path]::GetDirectoryName($targetFileName)
+
+            # Write-Host "$($fileToCreate.FullName) => $($targetFileName))"
+
+            # Only create, not overwrite
+            if ([System.IO.File]::Exists($targetFileName))
+            {
+                continue
+            }
+
+            # Write-Host "Creating '$($targetFileName)'"
+
+            if (![System.IO.Directory]::Exists($targetDirectoryName))
+            {
+                Write-Host "Creating directory '$($targetDirectoryName)'"
+
+                New-Item $targetDirectoryName -ItemType directory
+            }
+
+            Copy-Item -Path $fileToCreate.FullName -Destination $targetFileName -Force
         }
-
-        # Write-Host "Creating '$($targetFileName)'"
-
-        if (![System.IO.Directory]::Exists($targetDirectoryName))
-        {
-            Write-Host "Creating directory '$($targetDirectoryName)'"
-
-            New-Item $targetDirectoryName -ItemType directory
-        }
-
-        Copy-Item -Path $fileToCreate.FullName -Destination $targetFileName -Force
     }
 
     # Replace
-    foreach ($fileToReplace in $replaceTemplateFiles)
+    if ($enableReplace)
     {
-        $relativeFileName = $fileToReplace.FullName.Replace("$($templateRootDirectory)\$($replaceDirectoryName)", "")
-        $targetFileName = Join-Path $gitRepositoryDirectory $relativeFileName
+        #Write-Host "Replace is enabled, checking for files to replace";
 
-        # Write-Host "$($fileToReplace.FullName) => $($targetFileName))"
-
-        # Only overwrite, not create
-        if (![System.IO.File]::Exists($targetFileName))
+        foreach ($fileToReplace in $replaceTemplateFiles)
         {
-            continue
+            $relativeFileName = $fileToReplace.FullName.Replace("$($templateRootDirectory)\$($replaceDirectoryName)", "")
+            $targetFileName = Join-Path $gitRepositoryDirectory $relativeFileName
+
+            # Write-Host "$($fileToReplace.FullName) => $($targetFileName))"
+
+            # Only overwrite, not create
+            if (![System.IO.File]::Exists($targetFileName))
+            {
+                continue
+            }
+
+            # Write-Host "Replacing $($targetFileName)"
+
+            Copy-Item -Path $fileToReplace.FullName -Destination $targetFileName -force
         }
-
-        # Write-Host "Replacing $($targetFileName)"
-
-        Copy-Item -Path $fileToReplace.FullName -Destination $targetFileName -force
     }
 }
 
