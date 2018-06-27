@@ -14,6 +14,31 @@ Information("Using output directory '{0}'", OutputRootDirectory);
 
 //-------------------------------------------------------------
 
+private void BuildTestProjects()
+{
+    foreach (var testProject in TestProjects)
+    {
+        Information("Building test project '{0}'", testProject);
+
+        var projectFileName = string.Format("./src/{0}/{0}.csproj", testProject);
+        
+        var msBuildSettings = new MSBuildSettings {
+            Verbosity = Verbosity.Quiet, // Verbosity.Diagnostic
+            ToolVersion = MSBuildToolVersion.VS2017,
+            Configuration = ConfigurationName,
+            MSBuildPlatform = MSBuildPlatform.x86, // Always require x86, see platform for actual target platform
+            PlatformTarget = PlatformTarget.MSIL
+        };
+
+        // Force disable SonarQube
+        msBuildSettings.Properties["SonarQubeExclude"] = new List<string>(new [] { "true" });
+
+        MSBuild(projectFileName, msBuildSettings);
+    }
+}
+
+//-------------------------------------------------------------
+
 Task("UpdateInfo")
     .Does(() =>
 {
@@ -60,6 +85,8 @@ Task("Build")
             Password = SonarPassword,
         });
     }
+
+    BuildTestProjects();
 });
 
 //-------------------------------------------------------------

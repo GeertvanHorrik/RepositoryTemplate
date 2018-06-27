@@ -37,3 +37,5 @@ var SonarUsername = GetBuildServerVariable("SonarUsername", string.Empty);
 var SonarPassword = GetBuildServerVariable("SonarPassword", string.Empty);
 var SonarProject = GetBuildServerVariable("SonarProject", SolutionName);
 
+
+var TestProjects = TestProjectsToBuild ?? new string[] { };
