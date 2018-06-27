@@ -11,7 +11,8 @@ private void UpdateSolutionAssemblyInfo()
 
     var assemblyInfoParseResult = ParseAssemblyInfo(SolutionAssemblyInfoFileName);
 
-    var assemblyInfo = new AssemblyInfoSettings {
+    var assemblyInfo = new AssemblyInfoSettings 
+    {
         Company = assemblyInfoParseResult.Company,
         Version = VersionMajorMinorPatch,
         FileVersion = VersionMajorMinorPatch,
@@ -85,15 +86,6 @@ Task("Clean")
     .ContinueOnError()
     .Does(() => 
 {
-    if (DirectoryExists(OutputRootDirectory))
-    {
-        DeleteDirectory(OutputRootDirectory, new DeleteDirectorySettings()
-        {
-            Force = true,
-            Recursive = true
-        });
-    }
-
     var platforms = new Dictionary<string, PlatformTarget>();
     platforms["AnyCPU"] = PlatformTarget.MSIL;
     platforms["x86"] = PlatformTarget.x86;
@@ -102,14 +94,30 @@ Task("Clean")
 
     foreach (var platform in platforms)
     {
-        Information("Cleaning output for platform '{0}'", platform.Value);
+        try
+        {
+            Information("Cleaning output for platform '{0}'", platform.Value);
 
-        MSBuild(SolutionFileName, configurator => 
-            configurator.SetConfiguration(ConfigurationName)
-                .SetVerbosity(Verbosity.Minimal)
-                .SetMSBuildPlatform(MSBuildPlatform.x86)
-                .SetPlatformTarget(platform.Value)
-                .WithTarget("Clean"));
+            MSBuild(SolutionFileName, configurator => 
+                configurator.SetConfiguration(ConfigurationName)
+                    .SetVerbosity(Verbosity.Minimal)
+                    .SetMSBuildPlatform(MSBuildPlatform.x86)
+                    .SetPlatformTarget(platform.Value)
+                    .WithTarget("Clean"));
+        }
+        catch (System.Exception ex)
+        {
+            Warning("Failed to clean output for platform '{0}': {1}", platform.Value, ex.Message);
+        }
+    }
+
+    if (DirectoryExists(OutputRootDirectory))
+    {
+        DeleteDirectory(OutputRootDirectory, new DeleteDirectorySettings()
+        {
+            Force = true,
+            Recursive = true
+        });
     }
 });
 
@@ -131,20 +139,33 @@ Task("CodeSign")
         return;
     }
 
-    var exeSignFilesSearchPattern = OutputRootDirectory + string.Format("/**/*{0}*.exe", CodeSignWildCard);
-    var dllSignFilesSearchPattern = OutputRootDirectory + string.Format("/**/*{0}*.dll", CodeSignWildCard);
-
     List<FilePath> filesToSign = new List<FilePath>();
 
-    Information("Searching for files to code sign using '{0}'", exeSignFilesSearchPattern);
+    // Note: only code-sign components & wpf apps, skip test projects & uwp apps
+    var projectsToCodeSign = new List<string>();
+    projectsToCodeSign.AddRange(Components);
+    projectsToCodeSign.AddRange(WpfApps);
 
-    filesToSign.AddRange(GetFiles(exeSignFilesSearchPattern));
+    foreach (var projectToCodeSign in projectsToCodeSign)
+    {
+        var projectFilesToSign = new List<FilePath>();
 
-    Information("Searching for files to code sign using '{0}'", dllSignFilesSearchPattern);
+        var outputDirectory = string.Format("{0}/{1}", OutputRootDirectory, projectToCodeSign);
 
-    filesToSign.AddRange(GetFiles(dllSignFilesSearchPattern));
+        var exeSignFilesSearchPattern = string.Format("{0}/**/*{1}*.exe", outputDirectory, CodeSignWildCard);
+        Information(exeSignFilesSearchPattern);
+        projectFilesToSign.AddRange(GetFiles(exeSignFilesSearchPattern));
 
-    Information("Found '{0}' files to code sign, this can take a few minutes", filesToSign.Count);
+        var dllSignFilesSearchPattern = string.Format("{0}/**/*{1}*.dll", outputDirectory, CodeSignWildCard);
+        Information(dllSignFilesSearchPattern);
+        projectFilesToSign.AddRange(GetFiles(dllSignFilesSearchPattern));
+
+        Information("Found '{0}' files to code sign for '{1}'", projectFilesToSign.Count, projectToCodeSign);
+
+        filesToSign.AddRange(projectFilesToSign);
+    }
+
+    Information("Found '{0}' files to code sign, this can take a few minutes...", filesToSign.Count);
 
     var signToolSignSettings = new SignToolSignSettings 
     {

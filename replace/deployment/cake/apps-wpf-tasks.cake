@@ -47,7 +47,13 @@ private void BuildWpfApps()
             PlatformTarget = PlatformTarget.MSIL
         };
 
-        // TODO: Enable GitLink / SourceLink, see RepositoryUrl, RepositoryBranchName, RepositoryCommitId variables
+        // Note: we need to set OverridableOutputPath because we need to be able to respect
+        // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
+        // are properties passed in using the command line)
+        var outputDirectory = string.Format("{0}/{1}/", OutputRootDirectory, wpfApp);
+        Information("Output directory: '{0}'", outputDirectory);
+        msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
+        msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
 
         MSBuild(projectFileName, msBuildSettings);
     }

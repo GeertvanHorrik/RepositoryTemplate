@@ -37,5 +37,9 @@ var SonarUsername = GetBuildServerVariable("SonarUsername", string.Empty);
 var SonarPassword = GetBuildServerVariable("SonarPassword", string.Empty);
 var SonarProject = GetBuildServerVariable("SonarProject", SolutionName);
 
+//-------------------------------------------------------------
 
+// Update some variables (like expanding paths, etc)
+
+OutputRootDirectory = System.IO.Path.GetFullPath(OutputRootDirectory);
 var TestProjects = TestProjectsToBuild ?? new string[] { };

@@ -22,7 +22,8 @@ private void BuildTestProjects()
 
         var projectFileName = string.Format("./src/{0}/{0}.csproj", testProject);
         
-        var msBuildSettings = new MSBuildSettings {
+        var msBuildSettings = new MSBuildSettings
+        {
             Verbosity = Verbosity.Quiet, // Verbosity.Diagnostic
             ToolVersion = MSBuildToolVersion.VS2017,
             Configuration = ConfigurationName,
@@ -31,7 +32,15 @@ private void BuildTestProjects()
         };
 
         // Force disable SonarQube
-        msBuildSettings.Properties["SonarQubeExclude"] = new List<string>(new [] { "true" });
+        msBuildSettings.WithProperty("SonarQubeExclude", "true");
+
+        // Note: we need to set OverridableOutputPath because we need to be able to respect
+        // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
+        // are properties passed in using the command line)
+        var outputDirectory = string.Format("{0}/{1}/", OutputRootDirectory, testProject);
+        Information("Output directory: '{0}'", outputDirectory);
+        msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
+        msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
 
         MSBuild(projectFileName, msBuildSettings);
     }
@@ -92,7 +101,6 @@ Task("Build")
 //-------------------------------------------------------------
 
 Task("Package")
-    .IsDependentOn("Build")
     .IsDependentOn("CodeSign")
     .Does(() =>
 {
@@ -100,6 +108,16 @@ Task("Package")
     PackageUwpApps();
     PackageWpfApps();
 });
+
+//-------------------------------------------------------------
+// Wrapper tasks since we don't want to add "Build" as a 
+// dependency to "Package" because we want to run in multiple
+// stages
+//-------------------------------------------------------------
+
+Task("BuildAndPackage")
+    .IsDependentOn("Build")
+    .IsDependentOn("Package");
 
 //-------------------------------------------------------------
 

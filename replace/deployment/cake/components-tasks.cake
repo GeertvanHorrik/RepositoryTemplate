@@ -54,6 +54,14 @@ private void BuildComponents()
             PlatformTarget = PlatformTarget.MSIL
         };
 
+        // Note: we need to set OverridableOutputPath because we need to be able to respect
+        // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
+        // are properties passed in using the command line)
+        var outputDirectory = string.Format("{0}/{1}/", OutputRootDirectory, component);
+        Information("Output directory: '{0}'", outputDirectory);
+        msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
+        msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
+
         // TODO: Enable GitLink / SourceLink, see RepositoryUrl, RepositoryBranchName, RepositoryCommitId variables
 
         MSBuild(projectFileName, msBuildSettings);
@@ -87,10 +95,27 @@ private void PackageComponents()
             useDotNetPack = !projectFileContents.ToLower().Contains("uap10.0");
         }
 
+        var outputDirectory = string.Format("{0}/{1}/", OutputRootDirectory, component);
+        Information("Output directory: '{0}'", outputDirectory);
+
         if (useDotNetPack)
         {
+            Information("Using 'dotnet pack' to package '{0}'", component);
+
+            var msBuildSettings = new DotNetCoreMSBuildSettings();
+
+            // Note: we need to set OverridableOutputPath because we need to be able to respect
+            // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
+            // are properties passed in using the command line)
+            msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
+            msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
+            msBuildSettings.WithProperty("ConfigurationName", ConfigurationName);
+            msBuildSettings.WithProperty("PackageVersion", VersionNuGet);
+
             var packSettings = new DotNetCorePackSettings
             {
+                MSBuildSettings = msBuildSettings,
+                OutputDirectory = OutputRootDirectory,
                 Configuration = ConfigurationName,
                 NoBuild = true,
             };
@@ -99,7 +124,7 @@ private void PackageComponents()
         }
         else
         {
-            Warning("Using Visual Studio to pack instead of 'dotnet pack' because UAP 10.0 project was detected. Unfortunately assemblies will not be signed inside the NuGet package");
+            Warning("Using Visual Studio to pack instead of 'dotnet pack' for '{0}' because UAP 10.0 project was detected. Unfortunately assemblies will not be signed inside the NuGet package", component);
 
             var msBuildSettings = new MSBuildSettings 
             {
@@ -110,8 +135,13 @@ private void PackageComponents()
                 PlatformTarget = PlatformTarget.MSIL
             };
 
-            msBuildSettings.Properties["ConfigurationName"] = new List<string>(new [] { ConfigurationName });
-            msBuildSettings.Properties["PackageVersion"] = new List<string>(new [] { VersionNuGet });
+            // Note: we need to set OverridableOutputPath because we need to be able to respect
+            // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
+            // are properties passed in using the command line)
+            msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
+            msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
+            msBuildSettings.WithProperty("ConfigurationName", ConfigurationName);
+            msBuildSettings.WithProperty("PackageVersion", VersionNuGet);
             msBuildSettings = msBuildSettings.WithTarget("pack");
 
             MSBuild(projectFileName, msBuildSettings);
