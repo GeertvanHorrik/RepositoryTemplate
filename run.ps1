@@ -62,8 +62,34 @@ foreach ($potentialGitRepository in $gitRepositories)
 
             Write-Host "Deleting '$($targetFileName)'"
 
-            Write-Host "[DELETING IS DISABLED, UNCOMMENT THE NEXT LINE IN THE SCRIPT TO ENABLE DELETING, USE AT YOUR OWN RISK]"
-            #Remove-Item -Path $targetFileName -Force
+            #Write-Host "[DELETING IS DISABLED, UNCOMMENT THE NEXT LINE IN THE SCRIPT TO ENABLE DELETING, USE AT YOUR OWN RISK]"
+            Remove-Item -Path $targetFileName -Force
+        }
+
+        # Always delete /tools/packages.config.md5sum
+        $checksumFileName = Join-Path $gitRepositoryDirectory "tools\packages.config.md5sum"
+        if ([System.IO.File]::Exists($checksumFileName))
+        {
+            Write-Host "Deleting '$($checksumFileName)'"
+            Remove-Item -Path $checksumFileName -Force
+        }
+
+        # Always delete /tools/addins
+        $cakeAddinsDirectory = Join-Path $gitRepositoryDirectory "tools\addins\"
+        if ([System.IO.Directory]::Exists($cakeAddinsDirectory))
+        {
+            Write-Host "Deleting '$($cakeAddinsDirectory)'"
+            Remove-Item -Path "$($cakeAddinsDirectory)*" -recurse -Force
+            Remove-Item -Path $cakeAddinsDirectory
+        }
+
+        # Always delete /tools/cake
+        $cakeDirectory = Join-Path $gitRepositoryDirectory "tools\cake\"
+        if ([System.IO.Directory]::Exists($cakeDirectory))
+        {
+            Write-Host "Deleting '$($cakeDirectory)'"
+            Remove-Item -Path "$($cakeDirectory)*" -recurse -Force
+            Remove-Item -Path $cakeDirectory
         }
     }
 
