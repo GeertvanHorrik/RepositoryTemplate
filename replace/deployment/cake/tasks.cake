@@ -20,7 +20,7 @@ private void BuildTestProjects()
     {
         Information("Building test project '{0}'", testProject);
 
-        var projectFileName = string.Format("./src/{0}/{0}.csproj", testProject);
+        var projectFileName = GetProjectFileName(testProject);
         
         var msBuildSettings = new MSBuildSettings
         {
