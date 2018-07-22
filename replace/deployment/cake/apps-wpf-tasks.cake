@@ -35,7 +35,7 @@ private void BuildWpfApps()
     
     foreach (var wpfApp in WpfApps)
     {
-        Information("Building WPF app '{0}'", wpfApp);
+        LogSeparator("Building WPF app '{0}'", wpfApp);
 
         var projectFileName = GetProjectFileName(wpfApp);
         
@@ -63,14 +63,12 @@ private void BuildWpfApps()
         
         foreach (var extensionToDelete in extensionsToDelete)
         {
-            var searchPattern = string.Format("{0}/**/*{1}", outputDirectory, extensionToDelete);
+            var searchPattern = string.Format("{0}**/*{1}", outputDirectory, extensionToDelete);
             var filesToDelete = GetFiles(searchPattern);
-            if (filesToDelete.Count > 0)
-            {
-                Information("Deleting '{0}' files using search pattern '{1}'", filesToDelete.Count, searchPattern);
-                
-                DeleteFiles(filesToDelete);
-            }
+
+            Information("Deleting '{0}' files using search pattern '{1}'", filesToDelete.Count, searchPattern);
+            
+            DeleteFiles(filesToDelete);
         }
     }
 }
@@ -86,7 +84,7 @@ private void PackageWpfAppUsingInnoSetup(string wpfApp, string channel)
         return;
     }
 
-    Information("Packaging WPF app '{0}' using Inno Setup", wpfApp);
+    LogSeparator("Packaging WPF app '{0}' using Inno Setup", wpfApp);
 
     var installersOnDeploymentsShare = string.Format("{0}/{1}/installer", DeploymentsShare, wpfApp);
     CreateDirectory(installersOnDeploymentsShare);
@@ -148,7 +146,7 @@ private void PackageWpfAppUsingInnoSetup(string wpfApp, string channel)
         var installerSourceFile = string.Format("{0}/{1}_{2}.exe", innoSetupReleasesRoot, wpfApp, VersionFullSemVer);
         CopyFile(installerSourceFile, string.Format("{0}/{1}_{2}.exe", installersOnDeploymentsShare, wpfApp, VersionFullSemVer));
         CopyFile(installerSourceFile, string.Format("{0}/{1}{2}.exe", installersOnDeploymentsShare, wpfApp, setupPostfix));
-    }   
+    }
 }
 //-------------------------------------------------------------
 
@@ -168,7 +166,7 @@ private void PackageWpfAppUsingSquirrel(string wpfApp, string channel)
         return;
     }
 
-    Information("Packaging WPF app '{0}' using Squirrel", wpfApp);
+    LogSeparator("Packaging WPF app '{0}' using Squirrel", wpfApp);
 
     CreateDirectory(squirrelReleasesRoot);
     CreateDirectory(squirrelOutputIntermediate);
