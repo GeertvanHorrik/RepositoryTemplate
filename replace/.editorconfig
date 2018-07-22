@@ -323,7 +323,7 @@ csharp_style_var_elsewhere = true:none
 # Ignore designer files
 #=======================================================================================
 
-[src/**/*.designer.cs]
+[src/**/*.designer.cs,src/**/GlobalSuppressions.cs,src/**/MethodTimeLogger.cs,src/**/SolutionAssemblyInfo.cs]
 charset = none
 end_of_line = none
 insert_final_newline = none

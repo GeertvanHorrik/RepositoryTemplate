@@ -1,4 +1,3 @@
-##$templateRootDirectory = "C:\Source\_SdkProjectTemplate"
 $templateRootDirectory = $PSScriptRoot
 $replaceRootDirectory = "C:\Source\"
 
