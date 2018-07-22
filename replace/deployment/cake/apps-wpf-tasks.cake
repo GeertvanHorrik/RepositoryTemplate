@@ -21,7 +21,7 @@ private void UpdateInfoForWpfApps()
         return;
     }
 
-    // No specific implementation required for now    
+    // No specific implementation required for now
 }
 
 //-------------------------------------------------------------
@@ -255,9 +255,20 @@ private void PackageWpfApps()
         channels.Add("beta");
         channels.Add("stable");
     }
+        else if (IsBetaBuild)
+    {
+        // Both alpha and beta, since MyApp.beta1 should also be available on the alpha channel
+        channels.Add("alpha");
+        channels.Add("beta");
+    }
+    else if (IsAlphaBuild)
+    {
+        // Single channel
+        channels.Add(Channel);
+    }
     else
     {
-        // Single channel        
+        // Unknown build type, just just a single channel
         channels.Add(Channel);
     }
 
