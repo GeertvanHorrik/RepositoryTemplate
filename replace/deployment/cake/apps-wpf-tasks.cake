@@ -56,6 +56,22 @@ private void BuildWpfApps()
         msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
 
         MSBuild(projectFileName, msBuildSettings);
+        
+        Information("Deleting unnecessary files for WPF app '{0}'", wpfApp);
+        
+        var extensionsToDelete = new [] { ".pdb", ".RoslynCA.json" };
+        
+        foreach (var extensionToDelete in extensionsToDelete)
+        {
+            var searchPattern = string.Format("{0}/**/*{1}", outputDirectory, extensionToDelete);
+            var filesToDelete = GetFiles(searchPattern);
+            if (filesToDelete.Count > 0)
+            {
+                Information("Deleting '{0}' files using search pattern '{1}'", filesToDelete.Count, searchPattern);
+                
+                DeleteFiles(filesToDelete);
+            }
+        }
     }
 }
 
@@ -220,7 +236,7 @@ private void PackageWpfAppUsingSquirrel(string wpfApp, string channel)
         // - [version]-full.nupkg
         // - Setup.exe => Setup.exe & WpfApp.exe
         // - Setup.msi
-        // - RELEASES            
+        // - RELEASES
 
         var squirrelFiles = GetFiles(string.Format("{0}/{1}-{2}*.nupkg", squirrelReleasesRoot, wpfApp, VersionNuGet));
         CopyFiles(squirrelFiles, releasesSourceDirectory);
@@ -228,7 +244,7 @@ private void PackageWpfAppUsingSquirrel(string wpfApp, string channel)
         CopyFile(string.Format("{0}/Setup.exe", squirrelReleasesRoot), string.Format("{0}/{1}.exe", releasesSourceDirectory, wpfApp));
         CopyFile(string.Format("{0}/Setup.msi", squirrelReleasesRoot), string.Format("{0}/Setup.msi", releasesSourceDirectory));
         CopyFile(string.Format("{0}/RELEASES", squirrelReleasesRoot), string.Format("{0}/RELEASES", releasesSourceDirectory));
-    }    
+    }
 }
 
 //-------------------------------------------------------------
@@ -255,7 +271,7 @@ private void PackageWpfApps()
         channels.Add("beta");
         channels.Add("stable");
     }
-        else if (IsBetaBuild)
+    else if (IsBetaBuild)
     {
         // Both alpha and beta, since MyApp.beta1 should also be available on the alpha channel
         channels.Add("alpha");
