@@ -26,26 +26,6 @@ private void ValidateGenericInput()
 
 //-------------------------------------------------------------
 
-private void LogSeparator(string messageFormat, params object[] args)
-{
-    Information("");
-    Information("----------------------------------------");
-    Information(messageFormat, args);
-    Information("----------------------------------------");
-    Information("");
-}
-
-//-------------------------------------------------------------
-
-private void LogSeparator()
-{
-    Information("");
-    Information("----------------------------------------");
-    Information("");
-}
-
-//-------------------------------------------------------------
-
 private void CleanUpCode(bool failOnChanges)
 {
     Information("Cleaning up code using CodeCleanup (R# command line tools)");
@@ -104,22 +84,6 @@ private void UpdateSolutionAssemblyInfo()
 
 //-------------------------------------------------------------
 
-private string GetProjectDirectory(string projectName)
-{
-    var projectDirectory = string.Format("./src/{0}/", projectName);
-    return projectDirectory;
-}
-
-//-------------------------------------------------------------
-
-private string GetProjectFileName(string projectName)
-{
-    var fileName = string.Format("{0}{1}.csproj", GetProjectDirectory(projectName), projectName);
-    return fileName;
-}
-
-//-------------------------------------------------------------
-
 Task("UpdateNuGet")
     .ContinueOnError()
     .Does(() => 
@@ -141,32 +105,47 @@ Task("UpdateNuGet")
 
 Task("RestorePackages")
     .IsDependentOn("UpdateNuGet")
+    .ContinueOnError()
     .Does(() =>
 {
+    var projects = GetFiles("./**/*.csproj");
     var solutions = GetFiles("./**/*.sln");
     
-    foreach(var solution in solutions)
+    var allFiles = new List<FilePath>();
+    allFiles.AddRange(projects);
+    allFiles.AddRange(solutions);
+
+    foreach(var file in allFiles)
     {
-        Information("Restoring packages for {0}", solution);
+        Information("Restoring packages for {0}", file);
         
-        var nuGetRestoreSettings = new NuGetRestoreSettings();
-
-        if (!string.IsNullOrWhiteSpace(NuGetPackageSources))
+        try
         {
-            var sources = new List<string>();
+            var nuGetRestoreSettings = new NuGetRestoreSettings
+            {
+            };
 
-            foreach (var splitted in NuGetPackageSources.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+            if (!string.IsNullOrWhiteSpace(NuGetPackageSources))
             {
-                sources.Add(splitted);
+                var sources = new List<string>();
+
+                foreach (var splitted in NuGetPackageSources.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    sources.Add(splitted);
+                }
+                
+                if (sources.Count > 0)
+                {
+                    nuGetRestoreSettings.Source = sources;
+                }
             }
-            
-            if (sources.Count > 0)
-            {
-                nuGetRestoreSettings.Source = sources;
-            }
+
+            NuGetRestore(file, nuGetRestoreSettings);
         }
-
-        NuGetRestore(solution, nuGetRestoreSettings);
+        catch (Exception)
+        {
+            // Ignore
+        }
     }
 });
 

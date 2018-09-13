@@ -22,6 +22,12 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <None Update="**\*.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+  </ItemGroup>
+  
+  <ItemGroup>
     <Compile Remove="Platforms\**\*.cs;Resources\**\*.cs" />
     <Page Remove="Platforms\**\*.xaml" />
     <!-- This is here so that the conditionally included files below are all visible in VS -->
@@ -30,6 +36,7 @@
     <Resource Include="Resources\Fonts\**\*.ttf" />
     <Resource Include="Resources\Images\**\*.png" />
     <Resource Include="Resources\Images\**\*.gif" />
+    <EmbeddedResource Include="Resources\ThirdPartyNotices\**\*" />
   </ItemGroup>
 
   <ItemGroup>

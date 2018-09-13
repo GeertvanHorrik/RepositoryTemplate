@@ -1,7 +1,11 @@
+#l "lib-generic.cake"
 #l "generic-tasks.cake"
 #l "apps-uwp-tasks.cake"
+#l "apps-web-tasks.cake"
 #l "apps-wpf-tasks.cake"
 #l "components-tasks.cake"
+#l "docker-tasks.cake"
+#l "tests.cake"
 
 #addin "nuget:?package=System.Net.Http&version=4.3.3"
 #addin "nuget:?package=Newtonsoft.Json&version=11.0.2"
@@ -23,8 +27,10 @@ Information("Validating input");
 
 ValidateGenericInput();
 ValidateUwpAppsInput();
+ValidateWebAppsInput();
 ValidateWpfAppsInput();
 ValidateComponentsInput();
+ValidateDockerImagesInput();
 
 //-------------------------------------------------------------
 
@@ -32,7 +38,7 @@ private void BuildTestProjects()
 {
     foreach (var testProject in TestProjects)
     {
-        Information("Building test project '{0}'", testProject);
+        LogSeparator("Building test project '{0}'", testProject);
 
         var projectFileName = GetProjectFileName(testProject);
         
@@ -69,7 +75,9 @@ Task("UpdateInfo")
     
     UpdateInfoForComponents();
     UpdateInfoForUwpApps();
+    UpdateInfoForWebApps();
     UpdateInfoForWpfApps();
+    UpdateInfoForDockerImages();
 });
 
 //-------------------------------------------------------------
@@ -108,7 +116,9 @@ Task("Build")
 
     BuildComponents();
     BuildUwpApps();
+    BuildWebApps();
     BuildWpfApps();
+    BuildDockerImages();
 
     if (!string.IsNullOrWhiteSpace(SonarUrl))
     {
@@ -185,7 +195,24 @@ Task("Build")
 
 //-------------------------------------------------------------
 
+Task("Test")
+    // Note: no dependency on 'build' since we might have already built the solution
+    // Make sure we have the temporary "project.assets.json" in case we need to package with Visual Studio
+    .IsDependentOn("RestorePackages")
+    .Does(() =>
+{
+    foreach (var testProject in TestProjects)
+    {
+        LogSeparator("Running tests for '{0}'", testProject);
+
+        RunUnitTests(testProject);
+    }
+});
+
+//-------------------------------------------------------------
+
 Task("Package")
+    // Note: no dependency on 'build' since we might have already built the solution
     // Make sure we have the temporary "project.assets.json" in case we need to package with Visual Studio
     .IsDependentOn("RestorePackages")
     // Make sure to update if we are running on a new agent so we can sign nuget packages
@@ -195,7 +222,9 @@ Task("Package")
 {
     PackageComponents();
     PackageUwpApps();
+    PackageWebApps();
     PackageWpfApps();
+    PackageDockerImages();
 });
 
 //-------------------------------------------------------------
@@ -239,20 +268,51 @@ Task("PackageLocal")
 });
 
 //-------------------------------------------------------------
+
+Task("Deploy")
+    // Note: no dependency on 'package' since we might have already packaged the solution
+    // Make sure we have the temporary "project.assets.json" in case we need to package with Visual Studio
+    .IsDependentOn("RestorePackages")
+    .Does(() =>
+{
+    DeployComponents();
+    DeployUwpApps();
+    DeployWebApps();
+    DeployWpfApps();
+    DeployDockerImages();
+});
+
+//-------------------------------------------------------------
 // Wrapper tasks since we don't want to add "Build" as a 
 // dependency to "Package" because we want to run in multiple
 // stages
 //-------------------------------------------------------------
 
+Task("BuildAndTest")
+    .IsDependentOn("Build")
+    .IsDependentOn("Test");
+
+//-------------------------------------------------------------
+
 Task("BuildAndPackage")
     .IsDependentOn("Build")
+    .IsDependentOn("Test")
     .IsDependentOn("Package");
 
 //-------------------------------------------------------------
 
 Task("BuildAndPackageLocal")
     .IsDependentOn("Build")
+    //.IsDependentOn("Test") // Note: don't test for performance on local builds
     .IsDependentOn("PackageLocal");
+
+//-------------------------------------------------------------
+
+Task("BuildAndDeploy")
+    .IsDependentOn("Build")
+    .IsDependentOn("Test")
+    .IsDependentOn("Package")
+    .IsDependentOn("Deploy");
 
 //-------------------------------------------------------------
 
