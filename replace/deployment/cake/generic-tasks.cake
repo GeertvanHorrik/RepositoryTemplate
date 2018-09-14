@@ -11,7 +11,7 @@ private void ValidateRequiredInput(string parameterName)
 {
     if (!Parameters.ContainsKey(parameterName))
     {
-        Error("Parameter '{0}' is required but not defined", parameterName);
+        throw new Exception(string.Format("Parameter '{0}' is required but not defined", parameterName));
     }
 }
 

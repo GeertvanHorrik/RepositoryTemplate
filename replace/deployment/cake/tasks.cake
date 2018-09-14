@@ -197,8 +197,6 @@ Task("Build")
 
 Task("Test")
     // Note: no dependency on 'build' since we might have already built the solution
-    // Make sure we have the temporary "project.assets.json" in case we need to package with Visual Studio
-    .IsDependentOn("RestorePackages")
     .Does(() =>
 {
     foreach (var testProject in TestProjects)

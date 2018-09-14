@@ -32,7 +32,7 @@ private string GetProjectDirectory(string projectName)
 
 private string GetProjectOutputDirectory(string projectName)
 {
-    var projectDirectory = string.Format("./output/{0}/{1}", ConfigurationName, projectName);
+    var projectDirectory = string.Format("{0}/{1}", OutputRootDirectory, projectName);
     return projectDirectory;
 }
 
