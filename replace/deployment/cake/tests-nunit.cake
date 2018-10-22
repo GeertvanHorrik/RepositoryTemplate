@@ -21,7 +21,7 @@ private void RunTestsUsingNUnit(string projectName, string testTargetFramework, 
         NoHeader = true,
         NoColor = true,
         NoResults = false,
-        X86 = TestProcessBit.Equals("X86", StringComparer.OrdinalIgnoreCase)
+        X86 = string.Equals(TestProcessBit, "X86", StringComparison.OrdinalIgnoreCase)
         //Work = testResultsDirectory
     });
 
