@@ -68,6 +68,9 @@ var SonarUsername = GetBuildServerVariable("SonarUsername");
 var SonarPassword = GetBuildServerVariable("SonarPassword");
 var SonarProject = GetBuildServerVariable("SonarProject", SolutionName);
 
+// Testing
+var TestProcessBit = GetBuildServerVariable("TestProcessBit", "X86");
+
 //-------------------------------------------------------------
 
 // Update some variables (like expanding paths, etc)
