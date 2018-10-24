@@ -23,14 +23,22 @@ private bool HasWpfApps()
 
 //-------------------------------------------------------------
 
-private void PrepareForWpfApps()
+private async Task PrepareForWpfAppsAsync()
 {
     if (!HasWpfApps())
     {
         return;
     }
 
-    // No preparation needed yet
+    // Check whether projects should be processed, `.ToList()` 
+    // is required to prevent issues with foreach
+    foreach (var wpfApp in WpfApps.ToList())
+    {
+        if (!ShouldProcessProject(wpfApp))
+        {
+            WpfApps.Remove(wpfApp);
+        }
+    }
 }
 
 //-------------------------------------------------------------

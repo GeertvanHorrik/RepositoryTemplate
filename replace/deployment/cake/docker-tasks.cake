@@ -54,14 +54,22 @@ private bool HasDockerImages()
 
 //-------------------------------------------------------------
 
-private void PrepareForDockerImages()
+private async Task PrepareForDockerImagesAsync()
 {
     if (!HasDockerImages())
     {
         return;
     }
 
-    // No preparation needed yet
+    // Check whether projects should be processed, `.ToList()` 
+    // is required to prevent issues with foreach
+    foreach (var dockerImage in DockerImages.ToList())
+    {
+        if (!ShouldProcessProject(dockerImage))
+        {
+            DockerImages.Remove(dockerImage);
+        }
+    }
 }
 
 //-------------------------------------------------------------

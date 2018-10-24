@@ -67,13 +67,13 @@ private void BuildTestProjects()
 //-------------------------------------------------------------
 
 Task("Prepare")
-    .Does(() =>
+    .Does(async () =>
 {
-    PrepareForComponents();
-    PrepareForUwpApps();
-    PrepareForWebApps();
-    PrepareForWpfApps();
-    PrepareForDockerImages();
+    await PrepareForComponentsAsync();
+    await PrepareForUwpAppsAsync();
+    await PrepareForWebAppsAsync();
+    await PrepareForWpfAppsAsync();
+    await PrepareForDockerImagesAsync();
 });
 
 //-------------------------------------------------------------

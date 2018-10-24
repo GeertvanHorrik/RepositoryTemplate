@@ -34,11 +34,21 @@ private bool HasComponents()
 
 //-------------------------------------------------------------
 
-private void PrepareForComponents()
+private async Task PrepareForComponentsAsync()
 {
     if (!HasComponents())
     {
         return;
+    }
+
+    // Check whether projects should be processed, `.ToList()` 
+    // is required to prevent issues with foreach
+    foreach (var component in Components.ToList())
+    {
+        if (!ShouldProcessProject(component))
+        {
+            Components.Remove(component);
+        }
     }
 
     if (IsLocalBuild && Target.ToLower().Contains("packagelocal"))
@@ -49,8 +59,15 @@ private void PrepareForComponents()
 
             Information("Checking for existing local NuGet cached version at '{0}'", cacheDirectory);
 
-            if (DirectoryExists(cacheDirectory))
+            var retryCount = 3;
+
+            while (retryCount > 0)
             {
+                if (!DirectoryExists(cacheDirectory))
+                {
+                    break;
+                }
+
                 Information("Deleting already existing NuGet cached version from '{0}'", cacheDirectory);
                 
                 DeleteDirectory(cacheDirectory, new DeleteDirectorySettings()
@@ -58,7 +75,11 @@ private void PrepareForComponents()
                     Force = true,
                     Recursive = true
                 });
-            }
+
+                await System.Threading.Tasks.Task.Delay(1000);
+
+                retryCount--;
+            }            
         }
     }
 }

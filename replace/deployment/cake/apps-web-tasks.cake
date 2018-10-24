@@ -21,14 +21,22 @@ private bool HasWebApps()
 
 //-------------------------------------------------------------
 
-private void PrepareForWebApps()
+private async Task PrepareForWebAppsAsync()
 {
     if (!HasWebApps())
     {
         return;
     }
 
-    // No preparation needed yet
+    // Check whether projects should be processed, `.ToList()` 
+    // is required to prevent issues with foreach
+    foreach (var webApp in WebApps.ToList())
+    {
+        if (!ShouldProcessProject(webApp))
+        {
+            WebApps.Remove(webApp);
+        }
+    }
 }
 
 //-------------------------------------------------------------

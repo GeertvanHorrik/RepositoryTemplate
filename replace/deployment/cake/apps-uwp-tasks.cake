@@ -21,14 +21,22 @@ private bool HasUwpApps()
 
 //-------------------------------------------------------------
 
-private void PrepareForUwpApps()
+private async Task PrepareForUwpAppsAsync()
 {
     if (!HasUwpApps())
     {
         return;
     }
 
-    // No preparation needed yet
+    // Check whether projects should be processed, `.ToList()` 
+    // is required to prevent issues with foreach
+    foreach (var uwpApp in UwpApps.ToList())
+    {
+        if (!ShouldProcessProject(uwpApp))
+        {
+            UwpApps.Remove(uwpApp);
+        }
+    }
 }
 
 //-------------------------------------------------------------
