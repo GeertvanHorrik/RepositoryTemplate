@@ -54,6 +54,18 @@ private bool HasDockerImages()
 
 //-------------------------------------------------------------
 
+private void PrepareForDockerImages()
+{
+    if (!HasDockerImages())
+    {
+        return;
+    }
+
+    // No preparation needed yet
+}
+
+//-------------------------------------------------------------
+
 private void UpdateInfoForDockerImages()
 {
     if (!HasDockerImages())

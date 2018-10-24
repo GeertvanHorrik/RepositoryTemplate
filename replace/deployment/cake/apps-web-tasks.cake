@@ -21,6 +21,18 @@ private bool HasWebApps()
 
 //-------------------------------------------------------------
 
+private void PrepareForWebApps()
+{
+    if (!HasWebApps())
+    {
+        return;
+    }
+
+    // No preparation needed yet
+}
+
+//-------------------------------------------------------------
+
 private void UpdateInfoForWebApps()
 {
     if (!HasWebApps())

@@ -21,6 +21,18 @@ private bool HasUwpApps()
 
 //-------------------------------------------------------------
 
+private void PrepareForUwpApps()
+{
+    if (!HasUwpApps())
+    {
+        return;
+    }
+
+    // No preparation needed yet
+}
+
+//-------------------------------------------------------------
+
 public void UpdateAppxManifestVersion(string path, string version)
 {
     Information("Updating AppxManifest version @ '{0}' to '{1}'", path, version);

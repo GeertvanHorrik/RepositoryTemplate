@@ -34,6 +34,37 @@ private bool HasComponents()
 
 //-------------------------------------------------------------
 
+private void PrepareForComponents()
+{
+    if (!HasComponents())
+    {
+        return;
+    }
+
+    if (IsLocalBuild && Target.ToLower().Contains("packagelocal"))
+    {
+        foreach (var component in Components)
+        {
+            var cacheDirectory = Environment.ExpandEnvironmentVariables(string.Format("%userprofile%/.nuget/packages/{0}/{1}", component, VersionNuGet));
+
+            Information("Checking for existing local NuGet cached version at '{0}'", cacheDirectory);
+
+            if (DirectoryExists(cacheDirectory))
+            {
+                Information("Deleting already existing NuGet cached version from '{0}'", cacheDirectory);
+                
+                DeleteDirectory(cacheDirectory, new DeleteDirectorySettings()
+                {
+                    Force = true,
+                    Recursive = true
+                });
+            }
+        }
+    }
+}
+
+//-------------------------------------------------------------
+
 private void UpdateInfoForComponents()
 {
     if (!HasComponents())

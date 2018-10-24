@@ -23,6 +23,18 @@ private bool HasWpfApps()
 
 //-------------------------------------------------------------
 
+private void PrepareForWpfApps()
+{
+    if (!HasWpfApps())
+    {
+        return;
+    }
+
+    // No preparation needed yet
+}
+
+//-------------------------------------------------------------
+
 private void UpdateInfoForWpfApps()
 {
     if (!HasWpfApps())
