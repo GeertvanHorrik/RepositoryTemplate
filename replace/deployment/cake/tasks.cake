@@ -56,6 +56,12 @@ private void BuildTestProjects()
             PlatformTarget = PlatformTarget.MSIL
         };
 
+        var toolPath = GetVisualStudioPath(msBuildSettings.ToolVersion);
+        if (!string.IsNullOrWhiteSpace(toolPath))
+        {
+            msBuildSettings.ToolPath = toolPath;
+        }
+
         // Force disable SonarQube
         msBuildSettings.WithProperty("SonarQubeExclude", "true");
 

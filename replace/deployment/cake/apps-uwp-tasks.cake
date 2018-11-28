@@ -140,6 +140,12 @@ private void BuildUwpApps()
             PlatformTarget = platform.Value
         };
 
+        var toolPath = GetVisualStudioPath(msBuildSettings.ToolVersion);
+        if (!string.IsNullOrWhiteSpace(toolPath))
+        {
+            msBuildSettings.ToolPath = toolPath;
+        }
+
         // See https://docs.microsoft.com/en-us/windows/uwp/packaging/auto-build-package-uwp-apps for all the details
         //msBuildSettings.Properties["UseDotNetNativeToolchain"] = new List<string>(new [] { "false" });
         //msBuildSettings.Properties["UapAppxPackageBuildMode"] = new List<string>(new [] { "StoreUpload" });
