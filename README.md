@@ -13,7 +13,9 @@ The scripts are set up so only the `build.cake` in the root of the repository co
 - Build any project
 	-  Libraries (components)
 	-  WPF apps
-	-  UWP apps (dynamic switching between ARM and ARM64 will be implemented)
+	-  UWP apps
+		- No native compilation to speed up build times
+ 	 	- Dynamic switching between ARM and ARM64 will be implemented
 	-  Web apps
 	-  Docker containers
 - SonarQube integration (optional)
@@ -30,7 +32,15 @@ The builds are fully automated and can be ran from either Powershell or command 
 
 The source code is easily extendible to custom needs (e.g. support for different build servers).
 
-# Creating build.cake
+# Setting up the scripts
+
+## Copy the files 
+
+The first time, you will need to copy the files from `/replace/` to your repository.
+
+In subsequent updates, you can simply run `/run.ps1`, it will replace all the files.
+
+## Creating build.cake
 
 To create a build script, use the following default template in the root of the repository:
 
@@ -172,7 +182,7 @@ None
 TestProjects.Add("MyProject.Tests");
 ```
 
-# Running the build
+# Running builds
 
 There are several target actions available which can be ran in stages from a build server and/or agent:
 
@@ -216,3 +226,7 @@ To run a local build that is referencable, use the following script using powers
 ```
 .\build.ps1 -target buildanddeploy
 ```
+
+# Detailed explanation of all variables
+
+TODO: Create a table with all variables
