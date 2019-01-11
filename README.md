@@ -35,49 +35,49 @@ The source code is easily extendible to custom needs (e.g. support for different
 To create a build script, use the following default template in the root of the repository:
 
 ```
-	//=======================================================
-	// DEFINE PARAMETERS
-	//=======================================================
-	
-	// Define the required parameters
-	var Parameters = new Dictionary<string, object>();
-	Parameters["SolutionName"] = "[ProjectName, e.g. MyProject]";
-	Parameters["Company"] = "[CompanyName, e.g. MyCompany]";
-	Parameters["RepositoryUrl"] = string.Format("https://github.com/{0}/{1}", GetBuildServerVariable("Company"), GetBuildServerVariable("SolutionName"));
-	Parameters["StartYear"] = "[StartYear, e.g. 2014]";
-	Parameters["UseVisualStudioPrerelease"] = "false";
-	
-	// Note: the rest of the variables should be coming from the build server,
-	// see `/deployment/cake/*-variables.cake` for customization options
-	// 
-	// If required, more variables can be overridden by specifying them via the 
-	// Parameters dictionary, but the build server variables will always override
-	// them if defined by the build server. For example, to override the code
-	// sign wild card, add this to build.cake
-	//
-	// Parameters["CodeSignWildcard"] = "Orc.EntityFramework";
-	
-	//=======================================================
-	// DEFINE COMPONENTS TO BUILD / PACKAGE
-	//=======================================================
-	
-	// TODO: Define components, apps, etc to build / package
-	
-	//Components.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
-	//WpfApps.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
-	//UwpApps.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
-	//WebApps.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
-	//DockerImages.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
-	//TestProjects.Add(string.Format("{0}.Tests", GetBuildServerVariable("SolutionName")));
-	
-	//=======================================================
-	// REQUIRED INITIALIZATION, DO NOT CHANGE
-	//=======================================================
-	
-	// Now all variables are defined, include the tasks, that
-	// script will take care of the rest of the magic
-	
-	#l "./deployment/cake/tasks.cake"
+//=======================================================
+// DEFINE PARAMETERS
+//=======================================================
+
+// Define the required parameters
+var Parameters = new Dictionary<string, object>();
+Parameters["SolutionName"] = "[ProjectName, e.g. MyProject]";
+Parameters["Company"] = "[CompanyName, e.g. MyCompany]";
+Parameters["RepositoryUrl"] = string.Format("https://github.com/{0}/{1}", GetBuildServerVariable("Company"), GetBuildServerVariable("SolutionName"));
+Parameters["StartYear"] = "[StartYear, e.g. 2014]";
+Parameters["UseVisualStudioPrerelease"] = "false";
+
+// Note: the rest of the variables should be coming from the build server,
+// see `/deployment/cake/*-variables.cake` for customization options
+// 
+// If required, more variables can be overridden by specifying them via the 
+// Parameters dictionary, but the build server variables will always override
+// them if defined by the build server. For example, to override the code
+// sign wild card, add this to build.cake
+//
+// Parameters["CodeSignWildcard"] = "Orc.EntityFramework";
+
+//=======================================================
+// DEFINE COMPONENTS TO BUILD / PACKAGE
+//=======================================================
+
+// TODO: Define components, apps, etc to build / package
+
+//Components.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
+//WpfApps.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
+//UwpApps.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
+//WebApps.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
+//DockerImages.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
+//TestProjects.Add(string.Format("{0}.Tests", GetBuildServerVariable("SolutionName")));
+
+//=======================================================
+// REQUIRED INITIALIZATION, DO NOT CHANGE
+//=======================================================
+
+// Now all variables are defined, include the tasks, that
+// script will take care of the rest of the magic
+
+#l "./deployment/cake/tasks.cake"
 ```
 
 Once the default template is in place in the root of the repository, specific projects can be added.
@@ -89,14 +89,14 @@ Once the default template is in place in the root of the repository, specific pr
 *Note that these variables could (or should?) be coming from the build server / agent if possible. If that's not possible, then add the following variables to the top of your `build.cake` file.* 
 
 ```
-	Parameters["NuGetRepositoryUrl"] = "";
-	Parameters["NuGetRepositoryApiKey"] = "";
+Parameters["NuGetRepositoryUrl"] = "";
+Parameters["NuGetRepositoryApiKey"] = "";
 ```
 
 ### Define components
 
 ```
-	Components.Add("MyComponent");
+Components.Add("MyComponent");
 ```
 
 ## Using with WPF apps
@@ -110,7 +110,7 @@ Once the default template is in place in the root of the repository, specific pr
 ### Define components
 
 ```
-	WpfApps.Add("MyWpfApp");
+WpfApps.Add("MyWpfApp");
 ```
 
 ## Using with UWP apps
@@ -120,16 +120,16 @@ Once the default template is in place in the root of the repository, specific pr
 *Note that these variables could (or should?) be coming from the build server / agent if possible. If that's not possible, then add the following variables to the top of your `build.cake` file.* 
 
 ```
-	Parameters["WindowsStoreAppId"] = "";
-	Parameters["WindowsStoreClientId"] = "";
-	Parameters["WindowsStoreClientSecret"] = "";
-	Parameters["WindowsStoreTenantId"] = "";
+Parameters["WindowsStoreAppId"] = "";
+Parameters["WindowsStoreClientId"] = "";
+Parameters["WindowsStoreClientSecret"] = "";
+Parameters["WindowsStoreTenantId"] = "";
 ```
 
 ### Define components
 
 ```
-	UwpApps.Add("MyUwpProject");
+UwpApps.Add("MyUwpProject");
 ```
 
 ## Using with Web apps
@@ -143,7 +143,7 @@ Once the default template is in place in the root of the repository, specific pr
 ### Define components
 
 ```
-	WebApps.Add("MyWebApp");
+WebApps.Add("MyWebApp");
 ```
 
 ## Using with Docker images
@@ -157,7 +157,7 @@ Once the default template is in place in the root of the repository, specific pr
 ### Define components
 
 ```
-	DockerImages.Add("MyDockerImage");
+DockerImages.Add("MyDockerImage");
 ```
 
 ## Using with test projects
@@ -169,7 +169,7 @@ None
 ### Define components
 
 ```
-	TestProjects.Add("MyProject.Tests");
+TestProjects.Add("MyProject.Tests");
 ```
 
 # Running the build
@@ -196,23 +196,23 @@ There are also some convenience combinations:
 To run a local build that is referencable, use the following script using powershell or command prompt:
 
 ```
-	.\build.ps1 -target buildandpackagelocal
+.\build.ps1 -target buildandpackagelocal
 ```
 
 ## Running a build for a specific project
 
 ```
-	.\build.ps1 -target buildandpackagelocal -include MyOnlyComponentToInclude
+.\build.ps1 -target buildandpackagelocal -include MyOnlyComponentToInclude
 ```
 
 ## Running a build for everything but a specific project
 
 ```
-	.\build.ps1 -target buildandpackagelocal -exclude MyOnlyComponentToExclude
+.\build.ps1 -target buildandpackagelocal -exclude MyOnlyComponentToExclude
 ```
 
 ## Build and deploy it all
 
 ```
-	.\build.ps1 -target buildanddeploy
+.\build.ps1 -target buildanddeploy
 ```
