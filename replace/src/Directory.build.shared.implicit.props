@@ -18,6 +18,11 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
+  <!-- Workaround for pdb files for non-core platforms, see https://github.com/dotnet/sdk/issues/1458 -->
+  <ItemGroup Condition=" '$(TargetFramework)' != 'uap10.0' ">
+    <PackageReference Include="SourceLink.Copy.PdbFiles" Version="2.8.3" PrivateAssets="All" />
+  </ItemGroup>
+  
   <!-- Workaround for binding redirects in non exe assemblies, see https://github.com/Microsoft/msbuild/issues/1310#issuecomment-309596435 -->
   <Target Name="ForceGenerationOfBindingRedirects"
           AfterTargets="ResolveAssemblyReferences"
