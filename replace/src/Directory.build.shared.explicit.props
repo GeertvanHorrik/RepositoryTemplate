@@ -42,8 +42,8 @@
     </When>
     <Otherwise>
       <!--<Target>
-        <Message Importance="High" Text="Target platform identifier is '$(TargetPlatformIdentifier)', not applying pdb fix" />-->
-      </Target>
+        <Message Importance="High" Text="Target platform identifier is '$(TargetPlatformIdentifier)', not applying pdb fix" />
+      </Target>-->
     </Otherwise>
   </Choose>
   
