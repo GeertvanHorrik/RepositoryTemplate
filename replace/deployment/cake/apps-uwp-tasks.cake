@@ -120,7 +120,7 @@ private void BuildUwpApps()
     
     foreach (var uwpApp in UwpApps)
     {
-        Information("Building UWP app '{0}'", uwpApp);
+        LogSeparator("Building UWP app '{0}'", uwpApp);
 
         var artifactsDirectory = GetArtifactsDirectory(OutputRootDirectory);
         var appxUploadFileName = GetAppxUploadFileName(artifactsDirectory, uwpApp, VersionMajorMinorPatch);
