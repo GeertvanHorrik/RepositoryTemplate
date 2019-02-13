@@ -264,13 +264,14 @@ private void PackageComponents()
         Information(string.Empty);
 
         // Step 2: Go packaging!
-
         Information("Using 'dotnet pack' to package '{0}'", component);
 
         var msBuildSettings = new DotNetCoreMSBuildSettings
         {
             //Verbosity = DotNetCoreVerbosity.Diagnostic // DotNetCoreVerbosity.Minimal,
         };
+
+        ConfigureMsBuildForDotNetCore(msBuildSettings, component, "pack", allowVsPrerelease: false);
 
         // Note: we need to set OverridableOutputPath because we need to be able to respect
         // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
@@ -298,12 +299,6 @@ private void PackageComponents()
         // uses obj/release instead of [outputdirectory]
         msBuildSettings.WithProperty("DotNetPackIntermediateOutputPath", outputDirectory);
 
-        // msBuildSettings.AddFileLogger(new MSBuildFileLoggerSettings
-        // {
-        //     Verbosity = DotNetCoreVerbosity.Diagnostic,
-        //     LogFile = System.IO.Path.Combine(OutputRootDirectory, string.Format(@"MsBuild_{0}_pack.log", component))
-        // });
-
         var packSettings = new DotNetCorePackSettings
         {
             MSBuildSettings = msBuildSettings,
@@ -313,8 +308,14 @@ private void PackageComponents()
             Verbosity = msBuildSettings.Verbosity
         };
 
+        // Note: we need to set the binlog on the pack settings, not on the msbuild settings
+        var binLogArgs = string.Format("-bl:\"{0}\";ProjectImports=Embed", 
+            System.IO.Path.Combine(OutputRootDirectory, string.Format(@"MsBuild_{0}_{1}.binlog", component, "pack")));
+
+        packSettings.ArgumentCustomization = args => args.Append(binLogArgs);
+
         DotNetCorePack(projectFileName, packSettings);
-        
+      
         LogSeparator();
     }
 

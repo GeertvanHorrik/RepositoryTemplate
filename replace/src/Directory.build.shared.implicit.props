@@ -46,6 +46,12 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   
+  <!-- Allow 'dotnet pack' usage, even when using UAP -->
+  <PropertyGroup Condition="'$(NoBuild)' == 'true'">
+    <!-- https://github.com/dotnet/sdk/issues/810 - the temporary project has the wrong file extension -->
+    <LanguageTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Compile Include="..\*.cs">
       <SonarQubeExclude>true</SonarQubeExclude>
