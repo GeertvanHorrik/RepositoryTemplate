@@ -4,7 +4,7 @@
 #l "lib-octopusdeploy.cake"
 
 #addin "nuget:?package=Cake.FileHelpers&version=3.0.0"
-#addin "nuget:?package=Cake.Docker&version=0.9.6 "
+#addin "nuget:?package=Cake.Docker&version=0.9.9"
 
 //-------------------------------------------------------------
 
@@ -38,6 +38,20 @@ private string GetDockerImageTag(string projectName, string version)
 
     var tag = string.Format("{0}/{1}:v{2}", dockerRegistryUrl, projectName.Replace(".", "-"), version);
     return tag.ToLower();
+}
+
+//-------------------------------------------------------------
+
+private void ConfigureDockerSettings(AutoToolSettings dockerSettings)
+{
+    var engineUrl = DockerEngineUrl;
+    if (!string.IsNullOrWhiteSpace(engineUrl))
+    {
+        Information("Using remote docker engine: '{0}'", engineUrl);
+
+        dockerSettings.ArgumentCustomization = args => args.Prepend($"-H {engineUrl}");
+        //dockerSettings.BuildArg = new [] { $"DOCKER_HOST={engineUrl}" };
+    }
 }
 
 //-------------------------------------------------------------
@@ -189,11 +203,15 @@ private void PackageDockerImages()
         // Note: to prevent all output & source files to be copied to the docker context, we will set the
         // output directory as context (to keep the footprint as small as possible)
 
-        DockerBuild(new DockerImageBuildSettings
+        var dockerSettings = new DockerImageBuildSettings
         {
             File = dockerImageSpecificationFileName,
             Tag = new string[] { GetDockerImageTag(dockerImage, VersionNuGet) }
-        }, outputDirectory);
+        };
+
+        ConfigureDockerSettings(dockerSettings);
+
+        DockerBuild(dockerSettings, outputDirectory);
 
         LogSeparator();
     }
@@ -234,19 +252,27 @@ private void DeployDockerImages()
         // Note: we are logging in each time because the registry might be different per container
         Information("Logging in to docker @ '{0}'", dockerRegistryUrl);
 
-        DockerLogin(new DockerRegistryLoginSettings
+        var dockerLoginSettings = new DockerRegistryLoginSettings
         {
             Username = dockerRegistryUserName,
             Password = dockerRegistryPassword
-        }, dockerRegistryUrl);
+        };
+
+        ConfigureDockerSettings(dockerLoginSettings);
+
+        DockerLogin(dockerLoginSettings, dockerRegistryUrl);
 
         try
         {
             Information("Pushing docker images with tag '{0}' to '{1}'", dockerImageTag, dockerRegistryUrl);
 
-            DockerPush(new DockerImagePushSettings
+            var dockerImagePushSettings = new DockerImagePushSettings
             {
-            }, dockerImageTag);
+            };
+
+            ConfigureDockerSettings(dockerImagePushSettings);
+
+            DockerPush(dockerImagePushSettings, dockerImageTag);
 
             if (string.IsNullOrWhiteSpace(octopusRepositoryUrl))
             {
@@ -283,9 +309,13 @@ private void DeployDockerImages()
         {
             Information("Logging out of docker @ '{0}'", dockerRegistryUrl);
 
-            DockerLogout(new DockerRegistryLogoutSettings
+            var dockerLogoutSettings = new DockerRegistryLogoutSettings
             {
-            }, dockerRegistryUrl);
+            };
+
+            ConfigureDockerSettings(dockerLogoutSettings);
+
+            DockerLogout(dockerLogoutSettings, dockerRegistryUrl);
         }
     }
 }
