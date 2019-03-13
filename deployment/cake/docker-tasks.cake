@@ -213,7 +213,9 @@ private void PackageDockerImages()
 
         var dockerSettings = new DockerImageBuildSettings
         {
+            NoCache = true, // Don't use cache, always make sure to fetch the right images
             File = dockerImageSpecificationFileName,
+            Platform = "linux",
             Tag = new string[] { GetDockerImageTag(dockerImage, VersionNuGet) }
         };
 
