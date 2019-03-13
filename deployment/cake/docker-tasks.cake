@@ -36,7 +36,7 @@ private string GetDockerImageTag(string projectName, string version)
 {
     var dockerRegistryUrl = GetDockerRegistryUrl(projectName);
 
-    var tag = string.Format("{0}/{1}:v{2}", dockerRegistryUrl, projectName.Replace(".", "-"), version);
+    var tag = string.Format("{0}/{1}:{2}", dockerRegistryUrl, projectName.Replace(".", "-"), version);
     return tag.ToLower();
 }
 
