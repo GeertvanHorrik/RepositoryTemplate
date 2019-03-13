@@ -32,11 +32,19 @@ private string GetDockerRegistryPassword(string projectName)
 
 //-------------------------------------------------------------
 
+private string GetDockerImageName(string projectName)
+{
+    var name = projectName.Replace(".", "-");
+    return name.ToLower();
+}
+
+//-------------------------------------------------------------
+
 private string GetDockerImageTag(string projectName, string version)
 {
     var dockerRegistryUrl = GetDockerRegistryUrl(projectName);
 
-    var tag = string.Format("{0}/{1}:{2}", dockerRegistryUrl, projectName.Replace(".", "-"), version);
+    var tag = string.Format("{0}/{1}:{2}", dockerRegistryUrl, GetDockerImageName(projectName), version);
     return tag.ToLower();
 }
 
@@ -239,6 +247,7 @@ private void DeployDockerImages()
         var dockerRegistryUrl = GetDockerRegistryUrl(dockerImage);
         var dockerRegistryUserName = GetDockerRegistryUserName(dockerImage);
         var dockerRegistryPassword = GetDockerRegistryPassword(dockerImage);
+        var dockerImageName = GetDockerImageName(dockerImage);
         var dockerImageTag = GetDockerImageTag(dockerImage, VersionNuGet);
         var octopusRepositoryUrl = GetOctopusRepositoryUrl(dockerImage);
         var octopusRepositoryApiKey = GetOctopusRepositoryApiKey(dockerImage);
@@ -288,7 +297,11 @@ private void DeployDockerImages()
                 ApiKey = octopusRepositoryApiKey,
                 ReleaseNumber = VersionNuGet,
                 DefaultPackageVersion = VersionNuGet,
-                IgnoreExisting = true
+                IgnoreExisting = true,
+                Packages = new Dictionary<string, string>
+                {
+                    { dockerImageName, VersionNuGet }
+                }
             });
 
             Information("Deploying release '{0}' via Octopus Deploy", VersionNuGet);
