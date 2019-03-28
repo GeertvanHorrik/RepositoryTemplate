@@ -191,7 +191,12 @@
     <DefineConstants>$(DefineConstants);UAP;NETFX_CORE;UWP;WINDOWS_UWP</DefineConstants>
   </PropertyGroup>
   
-  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0.16299' ">
+    <EnableDefaultXamlItems>true</EnableDefaultXamlItems>
+    <DefineConstants>$(DefineConstants);UAP;UAP_16299;NETFX_CORE;UWP;WINDOWS_UWP</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' OR '$(TargetFramework)' == 'uap10.0.16299'">
     <None Remove="Platforms\uap10.0\**\*.xaml" />
     <Page Include="Platforms\uap10.0\**\*.xaml" SubType="Designer" Generator="MSBuild:Compile" />
     <Compile Update="Platforms\uap10.0\**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
