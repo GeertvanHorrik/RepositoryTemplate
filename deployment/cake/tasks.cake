@@ -1,5 +1,6 @@
 #l "lib-generic.cake"
 #l "lib-nuget.cake"
+#l "lib-sourcelink.cake"
 #l "generic-tasks.cake"
 #l "apps-uwp-tasks.cake"
 #l "apps-web-tasks.cake"
