@@ -9,7 +9,7 @@ using System.Xml.Linq;
 private string GetToolsNuGetRepositoryUrls(string projectName)
 {
     // Allow per project overrides via "NuGetRepositoryUrlFor[ProjectName]"
-    return GetProjectSpecificConfigurationValue(projectName, "ToolsNuGetRepositoryUrlsFor", NuGetRepositoryUrl);
+    return GetProjectSpecificConfigurationValue(projectName, "ToolsNuGetRepositoryUrlsFor", ToolsNuGetRepositoryUrls);
 }
 
 //-------------------------------------------------------------
@@ -17,7 +17,7 @@ private string GetToolsNuGetRepositoryUrls(string projectName)
 private string GetToolsNuGetRepositoryApiKeys(string projectName)
 {
     // Allow per project overrides via "NuGetRepositoryApiKeyFor[ProjectName]"
-    return GetProjectSpecificConfigurationValue(projectName, "ToolsNuGetRepositoryApiKeysFor", NuGetRepositoryApiKey);
+    return GetProjectSpecificConfigurationValue(projectName, "ToolsNuGetRepositoryApiKeysFor", ToolsNuGetRepositoryApiKeys);
 }
 
 //-------------------------------------------------------------
@@ -350,6 +350,8 @@ private void DeployTools()
         {
             throw new Exception("No NuGet repositories specified, as a protection mechanism this must *always* be specified to make sure packages aren't accidentally deployed to the default public NuGet feed");
         }
+
+        Information("Found '{0}' target NuGet servers to push tool '{1}'", nuGetServers.Count, tool);
 
         foreach (var nuGetServer in nuGetServers)
         {

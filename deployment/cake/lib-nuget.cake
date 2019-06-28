@@ -30,9 +30,15 @@ public List<NuGetServer> GetNuGetServers(string urls, string apiKeys)
 
     for (int i = 0; i < splittedUrls.Length; i++)
     {
+        var url = splittedUrls[i];
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            throw new Exception("Url for NuGet server cannot be empty");
+        }
+
         servers.Add(new NuGetServer
         {
-            Url = splittedUrls[i],
+            Url = url,
             ApiKey = splittedApiKeys[i]
         });
     }
