@@ -47,11 +47,19 @@
     </Otherwise>
   </Choose>
   
-  <!-- NuSpec updates -->
+  <!-- NuGet updates -->
   <PropertyGroup>
     <Title Condition=" '$(Title)' == '' ">$(PackageId)</Title>
   </PropertyGroup>
-  
+
+  <!-- This will include LICENSE.txt and VERIFICATION.txt for Chocolatey -->
+  <ItemGroup>
+    <None Include="$(OverridableOutputPath)\LICENSE.txt;$(OverridableOutputPath)\VERIFICATION.txt">
+      <Pack>true</Pack>
+      <PackagePath>tools</PackagePath>
+    </None>
+  </ItemGroup>
+
   <!-- T4 templating -->
   <ItemGroup>
     <None Update="**\*.tt">
