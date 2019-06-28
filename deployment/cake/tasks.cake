@@ -1,9 +1,11 @@
 #l "lib-generic.cake"
+#l "lib-nuget.cake"
 #l "generic-tasks.cake"
 #l "apps-uwp-tasks.cake"
 #l "apps-web-tasks.cake"
 #l "apps-wpf-tasks.cake"
 #l "components-tasks.cake"
+#l "tools-tasks.cake"
 #l "docker-tasks.cake"
 #l "github-pages-tasks.cake"
 #l "tests.cake"
@@ -29,6 +31,7 @@ ValidateUwpAppsInput();
 ValidateWebAppsInput();
 ValidateWpfAppsInput();
 ValidateComponentsInput();
+ValidateToolsInput();
 ValidateDockerImagesInput();
 ValidateGitHubPagesInput();
 
@@ -84,6 +87,7 @@ Task("Prepare")
     .Does(async () =>
 {
     await PrepareForComponentsAsync();
+    await PrepareForToolsAsync();
     await PrepareForUwpAppsAsync();
     await PrepareForWebAppsAsync();
     await PrepareForWpfAppsAsync();
@@ -100,6 +104,7 @@ Task("UpdateInfo")
     UpdateSolutionAssemblyInfo();
     
     UpdateInfoForComponents();
+    UpdateInfoForTools();
     UpdateInfoForUwpApps();
     UpdateInfoForWebApps();
     UpdateInfoForWpfApps();
@@ -143,6 +148,7 @@ Task("Build")
     }
 
     BuildComponents();
+    BuildTools();
     BuildUwpApps();
     BuildWebApps();
     BuildWpfApps();
@@ -248,6 +254,7 @@ Task("Package")
     .Does(() =>
 {
     PackageComponents();
+    PackageTools();
     PackageUwpApps();
     PackageWebApps();
     PackageWpfApps();
@@ -262,7 +269,7 @@ Task("PackageLocal")
     .Does(() =>
 {
     // For now only package components, we might need to move this to components-tasks.cake in the future
-    if (!HasComponents())
+    if (!HasComponents() && !HasTools())
     {
         return;
     }
@@ -289,6 +296,7 @@ Task("Deploy")
     .Does(() =>
 {
     DeployComponents();
+    DeployTools();
     DeployUwpApps();
     DeployWebApps();
     DeployWpfApps();
