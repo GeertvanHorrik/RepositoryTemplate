@@ -32,7 +32,7 @@
   <!-- Workaround for pdb files for non-core platforms, see https://github.com/dotnet/sdk/issues/1458, 
        but don't apply to UWP apps, see https://github.com/GeertvanHorrik/UwpResourcesIssue -->
   <Choose>
-    <When Condition="'$(TargetPlatformIdentifier)'!='UAP'">
+    <When Condition=" '$(TargetPlatformIdentifier)' != 'UAP' ">
       <!--<Target>
         <Message Importance="High" Text="Target platform identifier is '$(TargetPlatformIdentifier)', applying pdb fix" />
       </Target>-->
@@ -47,12 +47,19 @@
     </Otherwise>
   </Choose>
   
+  <!-- NuSpec updates -->
+  <PropertyGroup>
+    <Title Condition=" '$(Title)' == '' ">$(PackageId)</Title>
+  </PropertyGroup>
+  
+  <!-- T4 templating -->
   <ItemGroup>
     <None Update="**\*.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
   </ItemGroup>
 
+  <!-- Platform specific stuff -->
   <ItemGroup>
     <Compile Remove="Platforms\**\*.cs;Resources\**\*.cs" />
     <Page Remove="Platforms\**\*.xaml" />
