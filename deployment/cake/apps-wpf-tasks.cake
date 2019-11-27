@@ -108,7 +108,7 @@ public class WpfProcessor : ProcessorBase
             // - Setup.exe => [wpfApp]-[version].exe
             // - Setup.exe => [wpfApp]-[channel].exe
 
-            var installerSourceFile = string.Format("{0}/{1}_{2}.exe", innoSetupReleasesRoot, wpfApp, BuildContext.General.Version.FullSemVer);
+            var installerSourceFile = $"{innoSetupReleasesRoot}/{wpfApp}_{BuildContext.General.Version.FullSemVer}.exe";
             CakeContext.CopyFile(installerSourceFile, string.Format("{0}/{1}_{2}.exe", installersOnDeploymentsShare, wpfApp, BuildContext.General.Version.FullSemVer));
             CakeContext.CopyFile(installerSourceFile, string.Format("{0}/{1}{2}.exe", installersOnDeploymentsShare, wpfApp, setupSuffix));
         }
@@ -216,7 +216,7 @@ public class WpfProcessor : ProcessorBase
             // - Setup.msi
             // - RELEASES
 
-            var squirrelFiles = CakeContext.GetFiles(string.Format("{0}/{1}-{2}*.nupkg", squirrelReleasesRoot, wpfApp, BuildContext.General.Version.NuGet));
+            var squirrelFiles = CakeContext.GetFiles($"{squirrelReleasesRoot}/{wpfApp}{setupSuffix}-{BuildContext.General.Version.NuGet}*.nupkg");
             CakeContext.CopyFiles(squirrelFiles, releasesSourceDirectory);
             CakeContext.CopyFile(string.Format("{0}/Setup.exe", squirrelReleasesRoot), string.Format("{0}/Setup.exe", releasesSourceDirectory));
             CakeContext.CopyFile(string.Format("{0}/Setup.exe", squirrelReleasesRoot), string.Format("{0}/{1}.exe", releasesSourceDirectory, wpfApp));
