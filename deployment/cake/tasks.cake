@@ -18,9 +18,9 @@
 
 #addin "nuget:?package=System.Net.Http&version=4.3.3"
 #addin "nuget:?package=Newtonsoft.Json&version=11.0.2"
-#addin "nuget:?package=Cake.Sonar&version=1.1.22"
+#addin "nuget:?package=Cake.Sonar&version=1.1.25"
 
-#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.6.0"
+#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.8.0"
 #tool "nuget:?package=GitVersion.CommandLine&version=5.1.2-beta1.17&prerelease"
 
 //-------------------------------------------------------------
