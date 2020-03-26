@@ -18,6 +18,7 @@ public class GeneralContext : BuildContextWithItemsBase
     public bool IsBetaBuild { get; set; }
     public bool IsOfficialBuild { get; set; }
     public bool IsLocalBuild { get; set; }
+    public bool MaximizePerformance { get; set; }
     public bool UseVisualStudioPrerelease { get; set; }
     public bool VerifyDependencies { get; set; }
 
@@ -383,6 +384,7 @@ private GeneralContext InitializeGeneralContext(BuildContext buildContext, IBuil
     data.IsBetaBuild = buildContext.BuildServer.GetVariableAsBool("IsBetaBuild", false, showValue: true);
     data.IsOfficialBuild = buildContext.BuildServer.GetVariableAsBool("IsOfficialBuild", false, showValue: true);
     data.IsLocalBuild = data.Target.ToLower().Contains("local");
+    data.MaximizePerformance = buildContext.BuildServer.GetVariableAsBool("MaximizePerformance", true, showValue: true);
     data.UseVisualStudioPrerelease = buildContext.BuildServer.GetVariableAsBool("UseVisualStudioPrerelease", false, showValue: true);
     data.VerifyDependencies = !buildContext.BuildServer.GetVariableAsBool("DependencyCheckDisabled", false, showValue: true);
 
