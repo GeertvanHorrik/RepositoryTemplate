@@ -88,6 +88,17 @@ public class VersionContext : BuildContextBase
                     }
                 }
           
+                // Validate first
+                if (string.IsNullOrWhiteSpace(generalContext.Repository.BranchName))
+                {
+                    throw new Exception("No local .git directory was found, but repository branch was not specified either. Make sure to specify the branch");
+                }
+
+                if (string.IsNullOrWhiteSpace(generalContext.Repository.Url))
+                {
+                    throw new Exception("No local .git directory was found, but repository url was not specified either. Make sure to specify the branch");
+                }
+
                 // Dynamic repository
                 gitVersionSettings.UserName = generalContext.Repository.Username;
                 gitVersionSettings.Password = generalContext.Repository.Password;
@@ -444,7 +455,17 @@ private GeneralContext InitializeGeneralContext(BuildContext buildContext, IBuil
 
         var gitVersion = versionContext.GetGitVersionContext(data);
         
+        data.Repository.BranchName = gitVersion.BranchName;
         data.Repository.CommitId = gitVersion.Sha;
+    }
+
+    if (string.IsNullOrWhiteSpace(data.Repository.BranchName))
+    {
+        parentBuildContext.CakeContext.Information("No branch name specified, falling back to GitVersion");
+
+        var gitVersion = versionContext.GetGitVersionContext(data);
+        
+        data.Repository.BranchName = gitVersion.BranchName;
     }
 
     var versionToCheck = versionContext.FullSemVer;
