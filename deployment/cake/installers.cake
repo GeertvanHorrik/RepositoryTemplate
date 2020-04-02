@@ -57,6 +57,8 @@ public class InstallerIntegration : IntegrationBase
                 continue;
             }
 
+            BuildContext.CakeContext.LogSeparator($"Applying installer '{installer.GetType().Name}' for '{projectName}'");
+
             var stopwatch = Stopwatch.StartNew();
 
             try

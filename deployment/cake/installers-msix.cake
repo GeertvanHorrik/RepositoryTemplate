@@ -9,6 +9,7 @@ public class MsixInstaller : IInstaller
         BuildContext = buildContext;
 
         Publisher = BuildContext.BuildServer.GetVariable("MsixPublisher", showValue: true);
+        UpdateUrl = BuildContext.BuildServer.GetVariable("MsixUpdateUrl", showValue: true);
         IsEnabled = BuildContext.BuildServer.GetVariableAsBool("MsixEnabled", true, showValue: true);
 
         if (IsEnabled)
@@ -23,6 +24,8 @@ public class MsixInstaller : IInstaller
     public BuildContext BuildContext { get; private set; }
 
     public string Publisher { get; private set; }
+
+    public string UpdateUrl { get; private set; }
 
     public bool IsEnabled { get; private set; }
 
@@ -63,7 +66,7 @@ public class MsixInstaller : IInstaller
 
         BuildContext.CakeContext.LogSeparator("Packaging app '{0}' using MSIX", projectName);
 
-        var installersOnDeploymentsShare = string.Format("{0}/{1}/msix", BuildContext.Wpf.DeploymentsShare, projectName);
+        var installersOnDeploymentsShare = $"{BuildContext.Wpf.DeploymentsShare}/{projectName}/{channel}/msix";
         BuildContext.CakeContext.CreateDirectory(installersOnDeploymentsShare);
 
         var setupSuffix = BuildContext.Installer.GetDeploymentChannelSuffix();
@@ -78,21 +81,35 @@ public class MsixInstaller : IInstaller
         // Set up MSIX template, all based on the documentation here: https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-manual-conversion
         BuildContext.CakeContext.CopyDirectory(msixTemplateDirectory, msixOutputIntermediate);
 
-        var msixScriptFileName = string.Format("{0}/AppxManifest.xml", msixOutputIntermediate);
-        var fileContents = System.IO.File.ReadAllText(msixScriptFileName);
-        fileContents = fileContents.Replace("[PRODUCT]", projectName);
-        fileContents = fileContents.Replace("[PRODUCT_WITH_CHANNEL]", projectName + BuildContext.Installer.GetDeploymentChannelSuffix(""));
-        fileContents = fileContents.Replace("[PRODUCT_WITH_CHANNEL_DISPLAY]", projectName + BuildContext.Installer.GetDeploymentChannelSuffix(" (", ")"));
-        fileContents = fileContents.Replace("[PUBLISHER]", Publisher);
-        fileContents = fileContents.Replace("[PUBLISHER_DISPLAY]", BuildContext.General.Copyright.Company);
-        fileContents = fileContents.Replace("[CHANNEL_SUFFIX]", setupSuffix);
-        fileContents = fileContents.Replace("[CHANNEL]", BuildContext.Installer.GetDeploymentChannelSuffix(" (", ")"));
-        fileContents = fileContents.Replace("[VERSION]", BuildContext.General.Version.MajorMinorPatch);
-        fileContents = fileContents.Replace("[VERSION_WITH_REVISION]", $"{BuildContext.General.Version.MajorMinorPatch}.{BuildContext.General.Version.CommitsSinceVersionSource}");
-        fileContents = fileContents.Replace("[VERSION_DISPLAY]", BuildContext.General.Version.FullSemVer);
-        fileContents = fileContents.Replace("[WIZARDIMAGEFILE]", string.Format("logo_large{0}", setupSuffix));
+        var msixInstallerName = $"{projectName}_{BuildContext.General.Version.FullSemVer}.msix";
+        var installerSourceFile = $"{msixReleasesRoot}/{msixInstallerName}";
 
-        System.IO.File.WriteAllText(msixScriptFileName, fileContents);
+        var variables = new Dictionary<string, string>();
+        variables["[PRODUCT]"] = projectName;
+        variables["[PRODUCT_WITH_CHANNEL]"] = projectName + BuildContext.Installer.GetDeploymentChannelSuffix("");
+        variables["[PRODUCT_WITH_CHANNEL_DISPLAY]"] = projectName + BuildContext.Installer.GetDeploymentChannelSuffix(" (", ")");
+        variables["[PUBLISHER]"] = Publisher;
+        variables["[PUBLISHER_DISPLAY]"] = BuildContext.General.Copyright.Company;
+        variables["[CHANNEL_SUFFIX]"] = setupSuffix;
+        variables["[CHANNEL]"] = BuildContext.Installer.GetDeploymentChannelSuffix(" (", ")");
+        variables["[VERSION]"] = BuildContext.General.Version.MajorMinorPatch;
+        variables["[VERSION_WITH_REVISION]"] = $"{BuildContext.General.Version.MajorMinorPatch}.{BuildContext.General.Version.CommitsSinceVersionSource}";
+        variables["[VERSION_DISPLAY]"] = BuildContext.General.Version.FullSemVer;
+        variables["[WIZARDIMAGEFILE]"] = string.Format("logo_large{0}", setupSuffix);
+        variables["[URL_APPINSTALLER]"] = $"{UpdateUrl}/{projectName}/{channel}/msix/{projectName}.appinstaller";
+        variables["[URL_MSIX]"] = $"{UpdateUrl}/{projectName}/{channel}/msix/{msixInstallerName}";
+
+        // Installer file
+        var msixScriptFileName = string.Format("{0}/AppxManifest.xml", msixOutputIntermediate);
+        
+        ReplaceVariablesInFile(msixScriptFileName, variables);
+
+        // Update file
+        var msixUpdateScriptFileName = string.Format("{0}/App.AppInstaller", msixOutputIntermediate);
+        if (BuildContext.CakeContext.FileExists(msixUpdateScriptFileName))
+        {
+            ReplaceVariablesInFile(msixUpdateScriptFileName, variables);
+        }
 
         // Copy all files to the intermediate directory so MSIX knows what to do
         var appSourceDirectory = string.Format("{0}/{1}/**/*", BuildContext.General.OutputRootDirectory, projectName);
@@ -121,8 +138,6 @@ public class MsixInstaller : IInstaller
             WorkingDirectory = appTargetDirectory,
         };
 
-        var installerSourceFile = $"{msixReleasesRoot}/{projectName}_{BuildContext.General.Version.FullSemVer}.msix";
-
         processSettings.WithArguments(a => a.Append("pack")
                                             .AppendSwitchQuoted("/p", installerSourceFile)
                                             //.AppendSwitchQuoted("/m", msixScriptFileName) // If we specify this one, we *must* provide a mappings file, which we don't want to do
@@ -146,17 +161,44 @@ public class MsixInstaller : IInstaller
         // must *always* specify the hash algorithm (/fd) for MSIX files
         SignFile(signToolCommand, installerSourceFile, "/fd SHA256");
 
+        // Always copy the AppInstaller if available
+        if (BuildContext.CakeContext.FileExists(msixUpdateScriptFileName))
+        {
+            BuildContext.CakeContext.Information("Copying update manifest to output directory");
+
+            // - App.AppInstaller => [projectName].AppInstaller
+            BuildContext.CakeContext.CopyFile(msixUpdateScriptFileName, $"{msixReleasesRoot}/{projectName}.AppInstaller");
+        }
+
         if (BuildContext.Wpf.UpdateDeploymentsShare)
         {
             BuildContext.CakeContext.Information("Copying MSIX files to deployments share at '{0}'", installersOnDeploymentsShare);
 
             // Copy the following files:
-            // - Setup.exe => [projectName]-[version].msix
-            // - Setup.exe => [projectName]-[channel].msix
+            // - [ProjectName]_[version].msix => [projectName]_[version].msix
+            // - [ProjectName]_[version].msix => [projectName]_[channel].msix
 
-            BuildContext.CakeContext.CopyFile(installerSourceFile, string.Format("{0}/{1}_{2}.msix", installersOnDeploymentsShare, projectName, BuildContext.General.Version.FullSemVer));
-            BuildContext.CakeContext.CopyFile(installerSourceFile, string.Format("{0}/{1}{2}.msix", installersOnDeploymentsShare, projectName, setupSuffix));
+            BuildContext.CakeContext.CopyFile(installerSourceFile, $"{installersOnDeploymentsShare}/{msixInstallerName}");
+            BuildContext.CakeContext.CopyFile(installerSourceFile, $"{installersOnDeploymentsShare}/{projectName}{setupSuffix}.msix");
+
+            if (BuildContext.CakeContext.FileExists(msixUpdateScriptFileName))
+            {
+                // - App.AppInstaller => [projectName].AppInstaller
+                BuildContext.CakeContext.CopyFile(msixUpdateScriptFileName, $"{installersOnDeploymentsShare}/{projectName}.AppInstaller");
+            }
         }
+    }
+
+    private void ReplaceVariablesInFile(string fileName, Dictionary<string, string> variables)
+    {
+        var fileContents = System.IO.File.ReadAllText(fileName);
+
+        foreach (var keyValuePair in variables)
+        {
+            fileContents = fileContents.Replace(keyValuePair.Key, keyValuePair.Value);
+        }
+
+        System.IO.File.WriteAllText(fileName, fileContents);
     }
 
     private void SignFile(string signToolCommand, string fileName, string additionalCommandLineArguments = null)
@@ -183,6 +225,8 @@ public class MsixInstaller : IInstaller
                 BuildContext.CakeContext.Information(string.Empty);
                 return;
             }
+
+            BuildContext.CakeContext.Information(string.Empty);
         }
 
         // Sign
