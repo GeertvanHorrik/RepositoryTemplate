@@ -96,8 +96,10 @@ public class MsixInstaller : IInstaller
         variables["[VERSION_WITH_REVISION]"] = $"{BuildContext.General.Version.MajorMinorPatch}.{BuildContext.General.Version.CommitsSinceVersionSource}";
         variables["[VERSION_DISPLAY]"] = BuildContext.General.Version.FullSemVer;
         variables["[WIZARDIMAGEFILE]"] = string.Format("logo_large{0}", setupSuffix);
-        variables["[URL_APPINSTALLER]"] = $"{UpdateUrl}/{projectName}/{channel}/msix/{projectName}.appinstaller";
-        variables["[URL_MSIX]"] = $"{UpdateUrl}/{projectName}/{channel}/msix/{msixInstallerName}";
+
+        // Important: urls must be lower case, they are case sensitive in azure blob storage
+        variables["[URL_APPINSTALLER]"] = $"{UpdateUrl}/{projectName}/{channel}/msix/{projectName}.appinstaller".ToLower();
+        variables["[URL_MSIX]"] = $"{UpdateUrl}/{projectName}/{channel}/msix/{msixInstallerName}".ToLower();
 
         // Installer file
         var msixScriptFileName = string.Format("{0}/AppxManifest.xml", msixOutputIntermediate);
