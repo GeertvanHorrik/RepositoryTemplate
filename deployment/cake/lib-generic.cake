@@ -445,7 +445,15 @@ private static string GetVisualStudioDirectory(BuildContext buildContext, bool? 
     
     buildContext.CakeContext.Debug("Checking for installation of Visual Studio 2019");
 
-    var pathFor2019 = @"C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\";
+    var pathFor2019 = @"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\";
+    
+    if (System.IO.Directory.Exists(pathFor2019))
+    {
+       buildContext.CakeContext.Information("Using Visual Studio 2019");
+       return pathFor2019;
+    }
+
+    pathFor2019 = @"C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\";
     if (System.IO.Directory.Exists(pathFor2019))
     {
        buildContext.CakeContext.Information("Using Visual Studio 2019");
