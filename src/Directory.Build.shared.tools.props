@@ -9,13 +9,18 @@
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);GetToolsPackageFiles</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ToolDllFiles Include="$(OutputPath)\**\*.dll" />
+    <ToolExeFiles Include="$(OutputPath)\**\*.exe" />
+  </ItemGroup>
+
   <Target Name="GetToolsPackageFiles">
     <ItemGroup>
-      <BuildOutputInPackage Include="$(OutputPath)\**\*.dll">
-          <TargetPath>$([MSBuild]::MakeRelative('$(OutputPath)', %(FullPath)))</TargetPath>
+      <BuildOutputInPackage Include="@(ToolDllFiles)">
+          <TargetPath>$([MSBuild]::MakeRelative('$(OutputPath)', %(ToolDllFiles.FullPath)))</TargetPath>
       </BuildOutputInPackage>
-      <BuildOutputInPackage Include="$(OutputPath)\**\*.exe">
-          <TargetPath>$([MSBuild]::MakeRelative('$(OutputPath)', %(FullPath)))</TargetPath>
+      <BuildOutputInPackage Include="@(ToolExeFiles)">
+          <TargetPath>$([MSBuild]::MakeRelative('$(OutputPath)', %(ToolExeFiles.FullPath)))</TargetPath>
       </BuildOutputInPackage>
     </ItemGroup>
   </Target>
