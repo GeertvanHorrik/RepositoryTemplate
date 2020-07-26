@@ -555,9 +555,9 @@ private static string GetProjectFileName(BuildContext buildContext, string proje
 
 //-------------------------------------------------------------
 
-private static string GetProjectSlug(string projectName)
+private static string GetProjectSlug(string projectName, string replacement = "")
 {
-    var slug = projectName.Replace(".", string.Empty).Replace(" ", string.Empty);
+    var slug = projectName.Replace(".", replacement).Replace(" ", replacement);
     return slug;
 }
 
@@ -773,7 +773,14 @@ private static bool ShouldDeployProject(BuildContext buildContext, string projec
 
     var shouldDeploy = buildContext.BuildServer.GetVariableAsBool(keyToCheck, true);
     
-    buildContext.CakeContext.Information("Value for '{0}': {1}", keyToCheck, shouldDeploy);
+    if (shouldDeploy && !ShouldProcessProject(buildContext, projectName))
+    {
+        buildContext.CakeContext.Information($"Project '{projectName}' should not be processed, excluding it anyway");
+        
+        shouldDeploy = false;
+    }
+
+    buildContext.CakeContext.Information($"Value for '{keyToCheck}': {shouldDeploy}");
 
     return shouldDeploy;
 }
