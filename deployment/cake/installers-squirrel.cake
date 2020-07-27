@@ -139,7 +139,7 @@ public class SquirrelInstaller : IInstaller
 
         BuildContext.CakeContext.Information("Generating Squirrel packages, this can take a while, especially when signing is enabled...");
 
-        BuildContext.CakeContext.Squirrel(nuGetFileName, squirrelSettings);
+        BuildContext.CakeContext.Squirrel(nuGetFileName, squirrelSettings, true, false);
 
         if (BuildContext.Wpf.UpdateDeploymentsShare)
         {
