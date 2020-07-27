@@ -229,23 +229,24 @@ public class WpfProcessor : ProcessorBase
         {
             if (!ShouldDeployProject(BuildContext, wpfApp))
             {
-                CakeContext.Information("WPF app '{0}' should not be deployed", wpfApp);
+                CakeContext.Information($"WPF app '{wpfApp}' should not be deployed");
                 continue;
             }
             
-            BuildContext.CakeContext.LogSeparator("Deploying WPF app '{0}'", wpfApp);
+            BuildContext.CakeContext.LogSeparator($"Deploying WPF app '{wpfApp}'");
 
             //%DeploymentsShare%\%ProjectName% /%ProjectName% -c %AzureDeploymentsStorageConnectionString%
             var deploymentShare = BuildContext.Wpf.GetDeploymentShareForProject(wpfApp);
+            var projectSlug = GetProjectSlug(wpfApp, "-");
 
             var exitCode = CakeContext.StartProcess(azureStorageSyncExe, new ProcessSettings
             {
-                Arguments = string.Format("{0} /{1} -c {2}", deploymentShare, wpfApp, azureConnectionString)
+                Arguments = $"{deploymentShare} /{projectSlug} -c {azureConnectionString}"
             });
 
             if (exitCode != 0)
             {
-                throw new Exception(string.Format("Received unexpected exit code '{0}' for WPF app '{1}'", exitCode, wpfApp));
+                throw new Exception($"Received unexpected exit code '{exitCode}' for WPF app '{wpfApp}'");
             }
 
             await BuildContext.Notifications.NotifyAsync(wpfApp, string.Format("Deployed to target"), TargetType.WpfApp);
