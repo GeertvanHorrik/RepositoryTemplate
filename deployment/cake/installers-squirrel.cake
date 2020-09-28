@@ -83,6 +83,19 @@ public class SquirrelInstaller : IInstaller
 
         BuildContext.CakeContext.CopyDirectory(appSourceDirectory, appTargetDirectory);
 
+        var squirrelSourceFile = BuildContext.CakeContext.GetFiles("./tools/squirrel.windows.*/tools/Squirrel.exe").Single();
+
+        // We need to be 1 level deeper, let's just walk each directory in case we can support multi-platform releases
+        // in the future
+        foreach (var subDirectory in BuildContext.CakeContext.GetSubDirectories(appTargetDirectory))
+        {
+            var squirrelTargetFile = System.IO.Path.Combine(appTargetDirectory, subDirectory.Segments[subDirectory.Segments.Length - 1], "Squirrel.exe");
+
+            BuildContext.CakeContext.Information("Copying Squirrel.exe to support self-updates from '{0}' => '{1}'", squirrelSourceFile, squirrelTargetFile);
+
+            BuildContext.CakeContext.CopyFile(squirrelSourceFile, squirrelTargetFile);
+        }
+
         // Make sure all files are signed before we package them for Squirrel (saves potential errors occurring later in squirrel releasify)
         var signToolCommand = string.Empty;
 
