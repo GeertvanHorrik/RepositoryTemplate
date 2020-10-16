@@ -303,7 +303,8 @@ private static void BuildSolution(BuildContext buildContext)
         ToolVersion = MSBuildToolVersion.Default,
         Configuration = buildContext.General.Solution.ConfigurationName,
         MSBuildPlatform = MSBuildPlatform.x86, // Always require x86, see platform for actual target platform,
-        PlatformTarget = PlatformTarget.MSIL
+        PlatformTarget = PlatformTarget.MSIL,
+        NoLogo = true
     };
 
     //ConfigureMsBuild(buildContext, msBuildSettings, dependency);
@@ -338,6 +339,9 @@ private static void ConfigureMsBuild(BuildContext buildContext, MSBuildSettings 
     // msBuildSettings.WithProperty("SolutionName", buildContext.General.Solution.Name);
     // msBuildSettings.WithProperty("SolutionExt", ".sln");
     // msBuildSettings.WithProperty("DefineExplicitDefaults", "true");
+
+    // Disable copyright info
+    msBuildSettings.NoLogo = true;
 
     // Use as much CPU as possible
     msBuildSettings.MaxCpuCount = 0;
@@ -386,6 +390,9 @@ private static void ConfigureMsBuildForDotNetCore(BuildContext buildContext, Dot
     // msBuildSettings.WithProperty("SolutionName", buildContext.General.Solution.Name);
     // msBuildSettings.WithProperty("SolutionExt", ".sln");
     // msBuildSettings.WithProperty("DefineExplicitDefaults", "true");
+
+    // Disable copyright info
+    msBuildSettings.NoLogo = true;
 
     // Use as much CPU as possible
     msBuildSettings.MaxCpuCount = 0;
