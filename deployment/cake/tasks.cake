@@ -16,6 +16,7 @@
 #l "github-pages-tasks.cake"
 #l "vsextensions-tasks.cake"
 #l "tests.cake"
+#l "templates-tasks.cake"
 
 #addin "nuget:?package=System.Net.Http&version=4.3.3"
 #addin "nuget:?package=Newtonsoft.Json&version=11.0.2"
@@ -62,10 +63,13 @@ public class BuildContext : BuildContextBase
     {
         Processors = new List<IProcessor>();
         AllProjects = new List<string>();
+        Variables = new Dictionary<string, string>();  
     }
 
     public List<IProcessor> Processors { get; private set; }
     public Dictionary<string, object> Parameters { get; set; }
+    public Dictionary<string, string> Variables { get; private set; }
+    
 
     // Integrations
     public BuildServerIntegration BuildServer { get; set; }
@@ -88,6 +92,7 @@ public class BuildContext : BuildContextBase
     public VsExtensionsContext VsExtensions { get; set; }
     public WebContext Web { get; set; }
     public WpfContext Wpf { get; set; }
+    public TemplatesContext Templates { get; set; }
 
     public List<string> AllProjects { get; private set; }
 
@@ -132,6 +137,7 @@ Setup<BuildContext>(setupContext =>
     buildContext.VsExtensions = InitializeVsExtensionsContext(buildContext, buildContext);
     buildContext.Web = InitializeWebContext(buildContext, buildContext);
     buildContext.Wpf = InitializeWpfContext(buildContext, buildContext);
+    buildContext.Templates = InitializeTemplatesContext(buildContext, buildContext);
 
     // All projects, but dependencies first & tests last
     buildContext.AllProjects.AddRange(buildContext.Dependencies.Items);
@@ -168,6 +174,7 @@ Setup<BuildContext>(setupContext =>
     buildContext.Processors.Add(new VsExtensionsProcessor(buildContext));
     buildContext.Processors.Add(new WebProcessor(buildContext));
     buildContext.Processors.Add(new WpfProcessor(buildContext));
+    buildContext.Processors.Add(new TemplatesProcessor(buildContext));
 
     setupContext.LogSeparator("Build context is ready, displaying state info");
 
@@ -208,6 +215,10 @@ Task("Initialize")
     {
         buildContext.BuildServer.SetVariable(variableToUpdate.Key, variableToUpdate.Value);
     }
+
+    buildContext.Variables["GitVersion_MajorMinorPatch"] = buildContext.General.Version.MajorMinorPatch;
+    buildContext.Variables["GitVersion_FullSemVer"] = buildContext.General.Version.FullSemVer;
+    buildContext.Variables["GitVersion_NuGetVersion"] = buildContext.General.Version.NuGet;
 });
 
 //-------------------------------------------------------------
