@@ -16,7 +16,7 @@ public class TemplatesContext : BuildContextWithItemsBase
     
     protected override void LogStateInfoForContext()
     {
-        CakeContext.Information($"Found '{Items.Count}' component projects");
+        CakeContext.Information($"Found '{Items.Count}' template items");
     }
 }
 
