@@ -36,12 +36,15 @@ public class TemplatesProcessor : ProcessorBase
         }
 
         var variableRegex = new Regex(@"\$\{([^}]+)\}", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        
         foreach (var template in BuildContext.Templates.Items)
         {
-            CakeContext.Information("updateding file '{0}'", template);
+            CakeContext.Information("Updating file '{0}'", template);
+            
             var templateFile  = $"deployment/templates/{template}";
             var content = CakeContext.FileReadText(templateFile);
             var variableNames = variableRegex.Matches(content).OfType<Match>().Select(m => m.Groups[1].Value).Distinct().ToList();
+            
             foreach (var variableName in variableNames)
             {
                 if(BuildContext.Variables.TryGetValue(variableName, out var replacement))
