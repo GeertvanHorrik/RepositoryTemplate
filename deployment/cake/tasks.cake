@@ -169,7 +169,8 @@ Setup<BuildContext>(setupContext =>
 
     setupContext.LogSeparator("Creating processors");
 
-    // Note: always put dependencies processor first (it's a dependency after all)
+    // Note: always put templates and dependencies processor first (it's a dependency after all)
+    buildContext.Processors.Add(new TemplatesProcessor(buildContext));
     buildContext.Processors.Add(new DependenciesProcessor(buildContext));
     buildContext.Processors.Add(new ComponentsProcessor(buildContext));
     buildContext.Processors.Add(new DockerImagesProcessor(buildContext));
@@ -179,7 +180,6 @@ Setup<BuildContext>(setupContext =>
     buildContext.Processors.Add(new VsExtensionsProcessor(buildContext));
     buildContext.Processors.Add(new WebProcessor(buildContext));
     buildContext.Processors.Add(new WpfProcessor(buildContext));
-    buildContext.Processors.Add(new TemplatesProcessor(buildContext));
 
     setupContext.LogSeparator("Build context is ready, displaying state info");
 
