@@ -5,6 +5,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.IO;
 
 //-------------------------------------------------------------
 
@@ -22,10 +23,17 @@ public class TemplatesProcessor : ProcessorBase
 
     public override async Task PrepareAsync()
     {
-        if (!HasItems())
+        var templatesRelativePath = "deployment/templates";
+        if (CakeContext.DirectoryExists(templatesRelativePath))
         {
-            return;
-        }    
+            var currentDirectoryPath = System.IO.Directory.GetCurrentDirectory();
+            var templateAbsolutePath = System.IO.Path.Combine(currentDirectoryPath, templatesRelativePath);
+            var files = System.IO.Directory.GetFiles(templateAbsolutePath, "*.*", System.IO.SearchOption.AllDirectories);
+            foreach (var file in files)
+            {
+                BuildContext.Templates.Items.Add(file.Substring(templateAbsolutePath.Length + 1));
+            }
+        }
     }
 
     public override async Task UpdateInfoAsync()
@@ -50,7 +58,7 @@ public class TemplatesProcessor : ProcessorBase
                 }
             }
 
-            CakeContext.FileWriteText($"src/{template}", content);
+            CakeContext.FileWriteText($"{template}", content);
         }        
     }
 
