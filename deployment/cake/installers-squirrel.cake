@@ -94,6 +94,14 @@ public class SquirrelInstaller : IInstaller
             BuildContext.CakeContext.Information("Copying Squirrel.exe to support self-updates from '{0}' => '{1}'", squirrelSourceFile, squirrelTargetFile);
 
             BuildContext.CakeContext.CopyFile(squirrelSourceFile, squirrelTargetFile);
+
+            var createDumpExecutable = System.IO.Path.Combine(appTargetDirectory, subDirectory.Segments[subDirectory.Segments.Length - 1], "createdump.exe");
+            if (BuildContext.CakeContext.FileExists(createDumpExecutable))
+            {
+                BuildContext.CakeContext.Information("Removing createdump.exe to prevent unnecessary shortcuts");
+
+                BuildContext.CakeContext.DeleteFile(createDumpExecutable);
+            }
         }
 
         // Make sure all files are signed before we package them for Squirrel (saves potential errors occurring later in squirrel releasify)
