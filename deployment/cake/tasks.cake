@@ -92,12 +92,12 @@ public class BuildContext : BuildContextBase
     public DependenciesContext Dependencies { get; set; }
     public DockerImagesContext DockerImages { get; set; }
     public GitHubPagesContext GitHubPages { get; set; }
+    public TemplatesContext Templates { get; set; }
     public ToolsContext Tools { get; set; }
     public UwpContext Uwp { get; set; }
     public VsExtensionsContext VsExtensions { get; set; }
     public WebContext Web { get; set; }
     public WpfContext Wpf { get; set; }
-    public TemplatesContext Templates { get; set; }
 
     public List<string> AllProjects { get; private set; }
 
