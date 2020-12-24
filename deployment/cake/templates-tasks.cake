@@ -67,18 +67,14 @@ public class TemplatesProcessor : ProcessorBase
 
     public override async Task BuildAsync()
     {
-        if (!HasItems())
-        {
-            return;
-        }
+        // Run templates every time
+        await UpdateInfoAsync();
     }
 
     public override async Task PackageAsync()
     {
-        if (!HasItems())
-        {
-            return;
-        }
+        // Run templates every time
+        await UpdateInfoAsync();
     }
 
     public override async Task DeployAsync()
