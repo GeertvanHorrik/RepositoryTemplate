@@ -133,7 +133,7 @@ private static void RestoreNuGetPackagesUsingDotnetRestore(BuildContext buildCon
                 ForceEvaluate = false,
                 IgnoreFailedSources = true,
                 NoCache = false,
-                NoDependencies = true, // use true to speed up things
+                NoDependencies = false, // use true to speed up things
                 Verbosity = DotNetCoreVerbosity.Normal
             };
     
