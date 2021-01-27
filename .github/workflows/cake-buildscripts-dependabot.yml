@@ -1,0 +1,32 @@
+name: dependabot-cake
+on:
+  workflow_dispatch:
+  schedule:
+    # run everyday at 6
+    - cron:  '0 6 * * *'
+
+jobs:
+  dependabot-cake:
+    runs-on: ubuntu-latest # linux, because this is a docker-action
+    steps:
+      - name: check/update cake dependencies
+        uses: nils-org/dependabot-cake-action@v1
+        with:
+          # Where to look for cake files to check for dependency upgrades.
+          # The directory is relative to the repository's root.
+          # Multiple paths can be provided by splitting them with a new line.
+          # Example:
+          #   directory: |
+          #     /path/to/first/module
+          #     /path/to/second/module
+          # Default: "/"
+          directory: "/deployment/cake"
+      
+          # Branch to create pull requests against.
+          # By default your repository's default branch is used.
+          target_branch: ""
+      
+          # Auth token used to push the changes back to github and create the pull request with.
+          # [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+          # default: ${{ github.token }}
+          token: ""
