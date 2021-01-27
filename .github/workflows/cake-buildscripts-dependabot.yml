@@ -21,12 +21,3 @@ jobs:
           #     /path/to/second/module
           # Default: "/"
           directory: "/deployment/cake"
-      
-          # Branch to create pull requests against.
-          # By default your repository's default branch is used.
-          target_branch: ""
-      
-          # Auth token used to push the changes back to github and create the pull request with.
-          # [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
-          # default: ${{ github.token }}
-          token: ""
