@@ -1,6 +1,6 @@
 #l "apps-wpf-variables.cake"
 
-#tool "nuget:?package=AzureStorageSync&version=2.0.0-alpha0028&prerelease"
+#tool "nuget:?package=AzureStorageSync&version=2.0.0-alpha0039&prerelease"
 
 //-------------------------------------------------------------
 
