@@ -1,7 +1,7 @@
 #l "apps-web-variables.cake"
 #l "lib-octopusdeploy.cake"
 
-#addin "nuget:?package=Microsoft.Azure.KeyVault.Core&version=1.0.0"
+#addin "nuget:?package=Microsoft.Azure.KeyVault.Core&version=3.0.5"
 #addin "nuget:?package=WindowsAzure.Storage&version=9.1.1"
 
 //-------------------------------------------------------------
