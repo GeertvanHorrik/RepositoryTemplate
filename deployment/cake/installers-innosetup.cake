@@ -157,8 +157,6 @@ public class InnoSetupInstaller : IInstaller
 
                 foreach (var installationFile in installationFiles)
                 {
-                    BuildContext.CakeContext.Information($"Applying release based on '{installationFile}'");
-
                     var releaseFileInfo = new System.IO.FileInfo(installationFile);
                     var relativeFileName = new DirectoryPath(projectDeploymentShare).GetRelativePath(new FilePath(releaseFileInfo.FullName)).FullPath.Replace("\\", "/");
 
@@ -185,6 +183,8 @@ public class InnoSetupInstaller : IInstaller
                             continue;
                         }
                     }
+
+                    BuildContext.CakeContext.Information($"Applying release based on '{installationFile}'");
 
                     var release = new DeploymentRelease
                     {

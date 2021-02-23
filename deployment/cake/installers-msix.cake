@@ -258,13 +258,32 @@ public class MsixInstaller : IInstaller
 
                 foreach (var msixFile in msixFiles)
                 {
-                    BuildContext.CakeContext.Information($"Applying release based on '{msixFile}'");
-
                     var releaseFileInfo = new System.IO.FileInfo(msixFile);
                     var relativeFileName = new DirectoryPath(projectDeploymentShare).GetRelativePath(new FilePath(releaseFileInfo.FullName)).FullPath.Replace("\\", "/");
                     var releaseVersion = releaseFileInfo.Name
                         .Replace($"{projectName}_", string.Empty)
                         .Replace($".msix", string.Empty);
+
+                    // Either empty or matching a release channel should be ignored
+                    if (string.IsNullOrWhiteSpace(releaseVersion) ||
+                        channels.Any(x => x == releaseVersion))
+                    {
+                        BuildContext.CakeContext.Information($"Ignoring '{msixFile}'");
+                        continue;
+                    }
+
+                    // Special case for stable releases
+                    if (channel == "stable")
+                    {
+                        if (releaseVersion.Contains("-alpha") ||
+                            releaseVersion.Contains("-beta"))
+                        {
+                            BuildContext.CakeContext.Information($"Ignoring '{msixFile}'");
+                            continue;
+                        }
+                    }
+
+                    BuildContext.CakeContext.Information($"Applying release based on '{msixFile}'");
 
                     var release = new DeploymentRelease
                     {
