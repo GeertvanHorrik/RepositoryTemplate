@@ -125,6 +125,22 @@ public class VersionContext : BuildContextBase
     }
 
     public bool ClearCache { get; set; }
+
+    private string _major;
+
+    public string Major
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_major))
+            {
+                _major = MajorMinorPatch[0].ToString();
+            }
+
+            return _major;
+        }
+    }
+
     public string MajorMinorPatch { get; set; }
     public string FullSemVer { get; set; }
     public string NuGet { get; set; }
