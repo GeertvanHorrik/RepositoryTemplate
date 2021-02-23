@@ -134,7 +134,18 @@ public class VersionContext : BuildContextBase
         {
             if (string.IsNullOrWhiteSpace(_major))
             {
-                _major = MajorMinorPatch[0].ToString();
+                _major = string.Empty;
+
+                for (int i = 0; i < MajorMinorPatch.Length; i++)
+                {
+                    var character = MajorMinorPatch[i];
+                    if (char.IsDigit(character))
+                    {
+                        break;
+                    }
+
+                    _major += character.ToString();
+                }
             }
 
             return _major;
