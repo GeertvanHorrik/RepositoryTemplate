@@ -175,6 +175,17 @@ public class InnoSetupInstaller : IInstaller
                         continue;
                     }
 
+                    // Special case for stable releases
+                    if (channel == "stable")
+                    {
+                        if (releaseVersion.Contains("-alpha") ||
+                            releaseVersion.Contains("-beta"))
+                        {
+                            BuildContext.CakeContext.Information($"Ignoring '{installationFile}'");
+                            continue;
+                        }
+                    }
+
                     var release = new DeploymentRelease
                     {
                         Name = releaseVersion,

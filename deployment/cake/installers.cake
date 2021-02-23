@@ -97,6 +97,8 @@ public class DeploymentRelease
 
 public class DeploymentReleasePart
 {
+    public string Hash { get; set; }
+
     public string RelativeFileName { get; set; }
 
     public ulong Size { get; set; }
