@@ -139,7 +139,7 @@ public class VersionContext : BuildContextBase
                 for (int i = 0; i < MajorMinorPatch.Length; i++)
                 {
                     var character = MajorMinorPatch[i];
-                    if (char.IsDigit(character))
+                    if (!char.IsDigit(character))
                     {
                         break;
                     }
