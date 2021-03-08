@@ -156,7 +156,8 @@ public class MsixInstaller : IInstaller
 
         // As documented at https://docs.microsoft.com/en-us/windows/msix/package/sign-app-package-using-signtool, we 
         // must *always* specify the hash algorithm (/fd) for MSIX files
-        SignFile(BuildContext, signToolCommand, installerSourceFile, "/fd SHA256");
+        //SignFile(BuildContext, signToolCommand, installerSourceFile, "/fd SHA256");
+        SignFile(BuildContext, signToolCommand, installerSourceFile);
 
         // Always copy the AppInstaller if available
         if (BuildContext.CakeContext.FileExists(msixUpdateScriptFileName))
