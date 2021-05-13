@@ -440,6 +440,7 @@ Task("Build")
 //-------------------------------------------------------------
 
 Task("Test")
+    .IsDependentOn("Prepare")
     // Note: no dependency on 'build' since we might have already built the solution
     .Does<BuildContext>(async buildContext =>
 {    
