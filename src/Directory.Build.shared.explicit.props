@@ -102,6 +102,7 @@
     <Resource Include="Resources\Images\**\*.jpg" />
     <Resource Include="Resources\Images\**\*.jpeg" />
     <Resource Include="Resources\Videos\**\*.mp4" />
+    <Resource Include="Resources\Videos\**\*.wav" />
     <EmbeddedResource Include="Resources\ThirdPartyNotices\**\*" />
   </ItemGroup>
 
