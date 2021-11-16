@@ -122,12 +122,12 @@ private static void ConfigureMsBuildForDotNetCore(BuildContext buildContext, Dot
     });
 
     // Enable for bin logging
-    //msBuildSettings.BinaryLogger = new MSBuildBinaryLogSettings
-    //{
-    //    Enabled = true,
-    //    Imports = MSBuildBinaryLogImports.Embed,
-    //    FileName = System.IO.Path.Combine(OutputRootDirectory, string.Format(@"MsBuild_{0}_{1}.binlog", projectName, action))
-    //};
+    msBuildSettings.BinaryLogger = new MSBuildBinaryLoggerSettings
+    {
+        Enabled = true,
+        Imports = MSBuildBinaryLoggerImports.Embed,
+        FileName = System.IO.Path.Combine(buildContext.General.OutputRootDirectory, string.Format(@"MsBuild_{0}_{1}.binlog", projectName, action))
+    };
     
     // Note: this only works for direct .net core msbuild usage, not when this is
     // being wrapped in a tool (such as 'dotnet pack')
