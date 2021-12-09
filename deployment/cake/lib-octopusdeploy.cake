@@ -1,4 +1,4 @@
-#tool "nuget:?package=OctopusTools&version=7.4.3532"
+#tool "nuget:?package=OctopusTools&version=7.4.3539"
 
 public class OctopusDeployIntegration : IntegrationBase
 {
