@@ -291,6 +291,7 @@ Task("Build")
     var sonarUrl = buildContext.General.SonarQube.Url;
 
     var enableSonar = !buildContext.General.SonarQube.IsDisabled && 
+                      !buildContext.General.IsCiBuild && // Only build on CI (all projects need to be included)
                       !string.IsNullOrWhiteSpace(sonarUrl);
     if (enableSonar)
     {
