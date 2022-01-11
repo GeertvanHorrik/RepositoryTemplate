@@ -50,6 +50,31 @@ public class DockerImagesProcessor : ProcessorBase
         return tag.TrimStart(' ', '/').ToLower();
     }
 
+    private string[] GetDockerImageTags(string projectName)
+    {
+        var dockerTags = new List<string>();
+
+        dockerTags.Add(GetDockerImageTag(projectName, BuildContext.General.Version.NuGet));
+
+        if (BuildContext.General.IsAlphaBuild)
+        {
+            dockerTags.Add(GetDockerImageTag(projectName, "latest-alpha"));
+        }
+
+        if (BuildContext.General.IsBetaBuild)
+        {
+            dockerTags.Add(GetDockerImageTag(projectName, "latest-beta"));
+        }
+
+        if (BuildContext.General.IsOfficialBuild)
+        {
+            dockerTags.Add(GetDockerImageTag(projectName, "latest-stable"));
+            dockerTags.Add(GetDockerImageTag(projectName, "latest"));
+        }
+
+        return dockerTags.ToArray();
+    }
+
     private void ConfigureDockerSettings(AutoToolSettings dockerSettings)
     {
         var engineUrl = BuildContext.DockerImages.DockerEngineUrl;
@@ -151,6 +176,7 @@ public class DockerImagesProcessor : ProcessorBase
         // ./output => output of the publish step
         // ./config => docker image and config files, in case they need to be packed as well
 
+
         foreach (var dockerImage in BuildContext.DockerImages.Items)
         {
             if (!ShouldDeployProject(BuildContext, dockerImage))
@@ -233,7 +259,7 @@ public class DockerImagesProcessor : ProcessorBase
                 NoCache = true, // Don't use cache, always make sure to fetch the right images
                 File = dockerImageSpecificationFileName,
                 //Platform = "linux",
-                Tag = new string[] { GetDockerImageTag(dockerImage, BuildContext.General.Version.NuGet) }
+                Tag = GetDockerImageTags(dockerImage)
             };
 
             ConfigureDockerSettings(dockerSettings);
@@ -267,7 +293,6 @@ public class DockerImagesProcessor : ProcessorBase
             var dockerRegistryUserName = GetDockerRegistryUserName(dockerImage);
             var dockerRegistryPassword = GetDockerRegistryPassword(dockerImage);
             var dockerImageName = GetDockerImageName(dockerImage);
-            var dockerImageTag = GetDockerImageTag(dockerImage, BuildContext.General.Version.NuGet);
             var octopusRepositoryUrl = BuildContext.OctopusDeploy.GetRepositoryUrl(dockerImage);
             var octopusRepositoryApiKey = BuildContext.OctopusDeploy.GetRepositoryApiKey(dockerImage);
             var octopusDeploymentTarget = BuildContext.OctopusDeploy.GetDeploymentTarget(dockerImage);
@@ -292,54 +317,57 @@ public class DockerImagesProcessor : ProcessorBase
 
             try
             {
-                CakeContext.Information("Pushing docker images with tag '{0}' to '{1}'", dockerImageTag, dockerRegistryUrl);
-
-                var dockerImagePushSettings = new DockerImagePushSettings
+                foreach (var dockerImageTag in GetDockerImageTags(dockerImage))
                 {
-                };
+                    CakeContext.Information("Pushing docker images with tag '{0}' to '{1}'", dockerImageTag, dockerRegistryUrl);
 
-                ConfigureDockerSettings(dockerImagePushSettings);
-
-                CakeContext.DockerPush(dockerImagePushSettings, dockerImageTag);
-
-                if (string.IsNullOrWhiteSpace(octopusRepositoryUrl))
-                {
-                    CakeContext.Warning("Octopus Deploy url is not specified, skipping deployment to Octopus Deploy");
-                    continue;
-                }
-
-                var imageVersion = BuildContext.General.Version.NuGet;
-
-                CakeContext.Information("Creating release '{0}' in Octopus Deploy", imageVersion);
-
-                CakeContext.OctoCreateRelease(dockerImage, new CreateReleaseSettings 
-                {
-                    Server = octopusRepositoryUrl,
-                    ApiKey = octopusRepositoryApiKey,
-                    ReleaseNumber = imageVersion,
-                    DefaultPackageVersion = imageVersion,
-                    IgnoreExisting = true,
-                    Packages = new Dictionary<string, string>
+                    var dockerImagePushSettings = new DockerImagePushSettings
                     {
-                        { dockerImageName, imageVersion }
+                    };
+
+                    ConfigureDockerSettings(dockerImagePushSettings);
+
+                    CakeContext.DockerPush(dockerImagePushSettings, dockerImageTag);
+
+                    if (string.IsNullOrWhiteSpace(octopusRepositoryUrl))
+                    {
+                        CakeContext.Warning("Octopus Deploy url is not specified, skipping deployment to Octopus Deploy");
+                        continue;
                     }
-                });
 
-                CakeContext.Information("Deploying release '{0}' via Octopus Deploy", imageVersion);
+                    var imageVersion = BuildContext.General.Version.NuGet;
 
-                CakeContext.OctoDeployRelease(octopusRepositoryUrl, octopusRepositoryApiKey, dockerImage, octopusDeploymentTarget, 
-                    imageVersion, new OctopusDeployReleaseDeploymentSettings
-                {
-                    ShowProgress = true,
-                    WaitForDeployment = true,
-                    DeploymentTimeout = TimeSpan.FromMinutes(5),
-                    CancelOnTimeout = true,
-                    GuidedFailure = true,
-                    Force = true,
-                    NoRawLog = true,
-                });
+                    CakeContext.Information("Creating release '{0}' in Octopus Deploy", imageVersion);
 
-                await BuildContext.Notifications.NotifyAsync(dockerImage, string.Format("Deployed to Octopus Deploy"), TargetType.DockerImage);
+                    CakeContext.OctoCreateRelease(dockerImage, new CreateReleaseSettings 
+                    {
+                        Server = octopusRepositoryUrl,
+                        ApiKey = octopusRepositoryApiKey,
+                        ReleaseNumber = imageVersion,
+                        DefaultPackageVersion = imageVersion,
+                        IgnoreExisting = true,
+                        Packages = new Dictionary<string, string>
+                        {
+                            { dockerImageName, imageVersion }
+                        }
+                    });
+
+                    CakeContext.Information("Deploying release '{0}' via Octopus Deploy", imageVersion);
+
+                    CakeContext.OctoDeployRelease(octopusRepositoryUrl, octopusRepositoryApiKey, dockerImage, octopusDeploymentTarget, 
+                        imageVersion, new OctopusDeployReleaseDeploymentSettings
+                    {
+                        ShowProgress = true,
+                        WaitForDeployment = true,
+                        DeploymentTimeout = TimeSpan.FromMinutes(5),
+                        CancelOnTimeout = true,
+                        GuidedFailure = true,
+                        Force = true,
+                        NoRawLog = true,
+                    });
+
+                    await BuildContext.Notifications.NotifyAsync(dockerImage, string.Format("Deployed to Octopus Deploy"), TargetType.DockerImage);
+                }
             }
             finally
             {
