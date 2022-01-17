@@ -54,7 +54,35 @@ public class DockerImagesProcessor : ProcessorBase
     {
         var dockerTags = new List<string>();
 
-        dockerTags.Add(GetDockerImageTag(projectName, BuildContext.General.Version.NuGet));
+        var versions = new List<string>();
+
+        versions.Add(BuildContext.General.Version.NuGet);
+
+        foreach (var version in new [] 
+                                {
+                                    BuildContext.General.Version.MajorMinor,
+                                    BuildContext.General.Version.Major
+                                })
+        {
+            var additionalTag = version;
+
+            if (BuildContext.General.IsAlphaBuild)
+            {
+                additionalTag += "-alpha";
+            }
+
+            if (BuildContext.General.IsBetaBuild)
+            {
+                additionalTag += "-beta";
+            }
+
+            versions.Add(additionalTag);
+        }
+
+        foreach (var version in versions)
+        {
+            dockerTags.Add(GetDockerImageTag(projectName, version));
+        }
 
         if (BuildContext.General.IsAlphaBuild)
         {
@@ -98,6 +126,11 @@ public class DockerImagesProcessor : ProcessorBase
         // is required to prevent issues with foreach
         foreach (var dockerImage in BuildContext.DockerImages.Items.ToList())
         {
+            foreach (var imageTag in GetDockerImageTags(dockerImage))
+            {
+                CakeContext.Information(imageTag);
+            }
+
             if (!ShouldProcessProject(BuildContext, dockerImage))
             {
                 BuildContext.DockerImages.Items.Remove(dockerImage);
