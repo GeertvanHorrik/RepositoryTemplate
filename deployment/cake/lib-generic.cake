@@ -638,3 +638,10 @@ private static bool ShouldDeployProject(BuildContext buildContext, string projec
 
     return shouldDeploy;
 }
+
+//-------------------------------------------------------------
+
+public static void Add(this Dictionary<string, List<string>> dictionary, string project, params string[] projects)
+{
+    dictionary.Add(project, new List<string>(projects));
+}

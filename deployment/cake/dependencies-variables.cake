@@ -4,10 +4,14 @@
 
 public class DependenciesContext : BuildContextWithItemsBase
 {
-    public DependenciesContext(IBuildContext parentBuildContext)
+    public DependenciesContext(IBuildContext parentBuildContext, Dictionary<string, List<string>> dependencies)
         : base(parentBuildContext)
     {
+        Dependencies = dependencies ?? new Dictionary<string, List<string>>();
+        Items = Dependencies.Keys.ToList();
     }
+
+    public Dictionary<string, List<string>> Dependencies { get; private set; }
 
     protected override void ValidateContext()
     {
@@ -24,25 +28,22 @@ public class DependenciesContext : BuildContextWithItemsBase
 
 private DependenciesContext InitializeDependenciesContext(BuildContext buildContext, IBuildContext parentBuildContext)
 {
-    var data = new DependenciesContext(parentBuildContext)
-    {
-        Items = Dependencies ?? new List<string>()
-    };
+    var data = new DependenciesContext(parentBuildContext, Dependencies);
 
     return data;
 }
 
 //-------------------------------------------------------------
 
-List<string> _dependencies;
+Dictionary<string, List<string>> _dependencies;
 
-public List<string> Dependencies
+public Dictionary<string, List<string>> Dependencies
 {
     get 
     {
         if (_dependencies is null)
         {
-            _dependencies = new List<string>();
+            _dependencies = new Dictionary<string, List<string>>();
         }
 
         return _dependencies;

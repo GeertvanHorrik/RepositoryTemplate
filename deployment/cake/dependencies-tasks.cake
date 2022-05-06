@@ -28,11 +28,13 @@ public class DependenciesProcessor : ProcessorBase
         // is required to prevent issues with foreach
         foreach (var dependency in BuildContext.Dependencies.Items.ToList())
         {
-            // Note: dependencies should always be built
-            // if (!ShouldProcessProject(BuildContext, dependency))
-            // {
-            //     BuildContext.Dependencies.Items.Remove(dependency);
-            // }
+            if (!ShouldBuildDependency(dependency))
+            {
+                BuildContext.CakeContext.Information("Skipping dependency '{0}' because no dependent projects are included", dependency);
+
+                BuildContext.Dependencies.Dependencies.Remove(dependency);
+                BuildContext.Dependencies.Items.Remove(dependency);
+            }
         }
     }
 
@@ -64,7 +66,7 @@ public class DependenciesProcessor : ProcessorBase
         }
         
         foreach (var dependency in BuildContext.Dependencies.Items)
-        {
+        {  
             BuildContext.CakeContext.LogSeparator("Building dependency '{0}'", dependency);
 
             var projectFileName = GetProjectFileName(BuildContext, dependency);
@@ -119,6 +121,25 @@ public class DependenciesProcessor : ProcessorBase
                 InjectSourceLinkInProjectFile(BuildContext, projectFileName);
             }
 
+            // Specific code signing, requires the following MSBuild properties:
+            // * CodeSignEnabled
+            // * CodeSignCommand
+            //
+            // This feature is built to allow projects that have post-build copy
+            // steps (e.g. for assets) to be signed correctly before being embedded
+            if (ShouldSignImmediately(BuildContext, dependency))
+            {
+                var codeSignToolFileName = FindSignToolFileName(BuildContext);
+                var codeSignVerifyCommand = $"verify /pa";
+                var codeSignCommand = string.Format("sign /a /t {0} /n {1}", BuildContext.General.CodeSign.TimeStampUri, 
+                    BuildContext.General.CodeSign.CertificateSubjectName);
+
+                msBuildSettings.WithProperty("CodeSignToolFileName", codeSignToolFileName);
+                msBuildSettings.WithProperty("CodeSignVerifyCommand", codeSignVerifyCommand);
+                msBuildSettings.WithProperty("CodeSignCommand", codeSignCommand);
+                msBuildSettings.WithProperty("CodeSignEnabled", "true");
+            }
+
             RunMsBuild(BuildContext, dependency, projectFileName, msBuildSettings, "build");
         }
     }
@@ -146,5 +167,26 @@ public class DependenciesProcessor : ProcessorBase
     public override async Task FinalizeAsync()
     {
 
+    }
+
+    private bool ShouldBuildDependency(string dependencyProject)
+    {
+        var dependencyInfo = BuildContext.Dependencies.Dependencies[dependencyProject];
+        if (dependencyInfo.Count == 0)
+        {
+            // No explicit projects defined, always build dependency
+            return true;
+        }
+
+        foreach (var projectRequiringDependency in dependencyInfo)
+        {
+            // Check if we should build this project
+            if (ShouldProcessProject(BuildContext, projectRequiringDependency))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
