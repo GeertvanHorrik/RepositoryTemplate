@@ -28,7 +28,7 @@ public class DependenciesProcessor : ProcessorBase
         // is required to prevent issues with foreach
         foreach (var dependency in BuildContext.Dependencies.Items.ToList())
         {
-            if (!ShouldBuildDependency(dependency))
+            if (!BuildContext.Dependencies.ShouldBuildDependency(dependency))
             {
                 BuildContext.CakeContext.Information("Skipping dependency '{0}' because no dependent projects are included", dependency);
 
@@ -167,26 +167,5 @@ public class DependenciesProcessor : ProcessorBase
     public override async Task FinalizeAsync()
     {
 
-    }
-
-    private bool ShouldBuildDependency(string dependencyProject)
-    {
-        var dependencyInfo = BuildContext.Dependencies.Dependencies[dependencyProject];
-        if (dependencyInfo.Count == 0)
-        {
-            // No explicit projects defined, always build dependency
-            return true;
-        }
-
-        foreach (var projectRequiringDependency in dependencyInfo)
-        {
-            // Check if we should build this project
-            if (ShouldProcessProject(BuildContext, projectRequiringDependency))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

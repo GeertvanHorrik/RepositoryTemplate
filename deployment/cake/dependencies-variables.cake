@@ -22,6 +22,31 @@ public class DependenciesContext : BuildContextWithItemsBase
     {
         CakeContext.Information($"Found '{Items.Count}' dependency projects");
     }
+
+    public bool ShouldBuildDependency(string dependencyProject)
+    {
+        if (!Dependencies.TryGetValue(dependencyProject, out var dependencyInfo))
+        {
+            return false;
+        }
+
+        if (dependencyInfo.Count == 0)
+        {
+            // No explicit projects defined, always build dependency
+            return true;
+        }
+
+        foreach (var projectRequiringDependency in dependencyInfo)
+        {
+            // Check if we should build this project
+            if (ShouldProcessProject((BuildContext)ParentContext, projectRequiringDependency))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 //-------------------------------------------------------------
