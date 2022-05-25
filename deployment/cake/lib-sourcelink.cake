@@ -1,4 +1,4 @@
-public static bool IsSourceLinkSupported(BuildContext buildContext, string projectFileName)
+public static bool IsSourceLinkSupported(BuildContext buildContext, string projectName, string projectFileName)
 {
     if (buildContext.General.SourceLink.IsDisabled)
     {
@@ -21,6 +21,12 @@ public static bool IsSourceLinkSupported(BuildContext buildContext, string proje
         return false;
     }
 
+    // Is this a test project?
+    if (buildContext.Tests.Items.Contains(projectName))
+    {
+        return false;
+    }
+
     // Only support when running a real build, e.g. ot for 'Package' only
     if (!buildContext.General.Target.ToLower().Contains("build"))
     {
@@ -32,12 +38,12 @@ public static bool IsSourceLinkSupported(BuildContext buildContext, string proje
 
 //-------------------------------------------------------------
 
-public static void InjectSourceLinkInProjectFile(BuildContext buildContext, string projectFileName)
+public static void InjectSourceLinkInProjectFile(BuildContext buildContext, string projectName, string projectFileName)
 {
     try
     {
         // Only support C# projects
-        if (!IsSourceLinkSupported(buildContext, projectFileName))
+        if (!IsSourceLinkSupported(buildContext, projectName, projectFileName))
         {
             return;
         }

@@ -145,7 +145,7 @@ Task("RestorePackages")
                 csharpProjects.Add(projectFileName);
 
                 // Inject source link *before* package restore
-                InjectSourceLinkInProjectFile(buildContext, projectFileName);
+                InjectSourceLinkInProjectFile(buildContext, project, projectFileName);
             }
         }
     }
