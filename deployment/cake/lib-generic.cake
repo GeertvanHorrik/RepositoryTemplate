@@ -524,6 +524,13 @@ private static bool ShouldProcessProject(BuildContext buildContext, string proje
         }
     }
 
+    // Is this a test project?
+    if (buildContext.Tests.Items.Contains(projectName))
+    {
+        // Assume false, the test processor will check for this
+        return false;
+    }
+
     // Includes > Excludes
     var includes = buildContext.General.Includes;
     if (includes.Count > 0)
