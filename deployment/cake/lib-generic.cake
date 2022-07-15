@@ -636,6 +636,13 @@ private static bool ShouldDeployProject(BuildContext buildContext, string projec
     var keyToCheck = string.Format("Deploy{0}", slug);
 
     var shouldDeploy = buildContext.BuildServer.GetVariableAsBool(keyToCheck, true);
+
+    // If this is *only* a dependency, it should never be deployed
+    if (IsOnlyDependencyProject(buildContext, projectName))
+    {
+        shouldDeploy = false;
+    }
+
     if (shouldDeploy && !ShouldProcessProject(buildContext, projectName, false))
     {
         buildContext.CakeContext.Information($"Project '{projectName}' should not be processed, excluding it anyway");
@@ -646,6 +653,65 @@ private static bool ShouldDeployProject(BuildContext buildContext, string projec
     buildContext.CakeContext.Information($"Value for '{keyToCheck}': {shouldDeploy}");
 
     return shouldDeploy;
+}
+
+//-------------------------------------------------------------
+
+private static bool IsOnlyDependencyProject(BuildContext buildContext, string projectName)
+{
+    // If not in the dependencies list, we can stop checking
+    if (!buildContext.Dependencies.Items.Contains(projectName))
+    {
+        return false;
+    }
+
+    if (buildContext.Components.Items.Contains(projectName))
+    {
+        return false;
+    }
+
+    if (buildContext.DockerImages.Items.Contains(projectName))
+    {
+        return false;
+    }
+
+    if (buildContext.GitHubPages.Items.Contains(projectName))
+    {
+        return false;
+    }
+
+    if (buildContext.Templates.Items.Contains(projectName))
+    {
+        return false;
+    }
+
+    if (buildContext.Tools.Items.Contains(projectName))
+    {
+        return false;
+    }            
+
+    if (buildContext.Uwp.Items.Contains(projectName))
+    {
+        return false;
+    }   
+
+    if (buildContext.VsExtensions.Items.Contains(projectName))
+    {
+        return false;
+    }   
+
+    if (buildContext.Web.Items.Contains(projectName))
+    {
+        return false;
+    }  
+
+    if (buildContext.Wpf.Items.Contains(projectName))
+    {
+        return false;
+    }  
+
+    // It's in the dependencies list and not in any other list
+    return true;
 }
 
 //-------------------------------------------------------------
