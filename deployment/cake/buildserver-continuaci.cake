@@ -9,19 +9,35 @@ public class ContinuaCIBuildServer : BuildServerBase
     
     public override async Task OnTestFailedAsync()
     {
-        await ImportNUnitTestFilesAsync();     
+        await ImportNUnitTestFilesAsync();
+        await ImportXUnitTestFilesAsync(); 
     }
 
     //-------------------------------------------------------------
 
     public override async Task AfterTestAsync()
     {
-        await ImportNUnitTestFilesAsync();     
+        await ImportNUnitTestFilesAsync();
+        await ImportXUnitTestFilesAsync();
     }
 
     //-------------------------------------------------------------
 
     private async Task ImportNUnitTestFilesAsync()
+    {
+        await ImportTestFilesAsync("nunit");
+    }
+
+    //-------------------------------------------------------------
+
+    private async Task ImportXUnitTestFilesAsync()
+    {
+        await ImportTestFilesAsync("xunit");
+    }
+
+    //-------------------------------------------------------------
+
+    private async Task ImportTestFilesAsync(string type)
     {
         var continuaCIContext = GetContinuaCIContext();
         if (!continuaCIContext.IsRunningOnContinuaCI)
@@ -48,9 +64,9 @@ public class ContinuaCIBuildServer : BuildServerBase
 
         var continuaCiFilePattern = System.IO.Path.Combine(testResultsDirectory, "**.xml");
 
-        CakeContext.Information($"Importing NUnit test results from using '{continuaCiFilePattern}'");
+        CakeContext.Information($"Importing test results from using '{continuaCiFilePattern}'");
 
-        var message = $"@@continua[importUnitTestResults type='nunit' filePatterns='{continuaCiFilePattern}']";
+        var message = $"@@continua[importUnitTestResults type='{type}' filePatterns='{continuaCiFilePattern}']";
         WriteIntegration(message);
     }
 

@@ -105,7 +105,11 @@ public class TestProcessor : ProcessorBase
         // 2. [SolutionName].Tests.[ProjectName]
         //
         // In both cases, we can simply remove ".Tests" and check if that project is being ignored
-        var expectedProjectName = projectName.Replace(".Tests", string.Empty);
+        var expectedProjectName = projectName
+            .Replace(".Tests", string.Empty)
+            .Replace(".Integration.Tests", string.Empty)
+            .Replace(".IntegrationTests", string.Empty);
+
         if (!ShouldProcessProject(BuildContext, expectedProjectName))
         {
             BuildContext.CakeContext.Information($"Skipping test project '{projectName}' because project '{expectedProjectName}' should not be processed either");
@@ -139,8 +143,6 @@ private static void RunUnitTests(BuildContext buildContext, string projectName)
 
             var dotNetTestSettings = new DotNetTestSettings
             {
-                ArgumentCustomization = args => args
-                    .Append($"-- NUnit.TestOutputXml={testResultsDirectory}"),
                 Configuration = buildContext.General.Solution.ConfigurationName,
                 // Loggers = new []
                 // {
@@ -152,6 +154,18 @@ private static void RunUnitTests(BuildContext buildContext, string projectName)
                 OutputDirectory = System.IO.Path.Combine(GetProjectOutputDirectory(buildContext, projectName), testTargetFramework),
                 ResultsDirectory = testResultsDirectory
             };
+
+            if (IsNUnitTestProject(buildContext, projectName))
+            {
+                dotNetTestSettings.ArgumentCustomization = args => args
+                    .Append($"-- NUnit.TestOutputXml={testResultsDirectory}");
+            }
+
+            if (IsXUnitTestProject(buildContext, projectName))
+            {
+                // dotNetTestSettings.ArgumentCustomization = args => args
+                //     .Append($"-- XUnit.TestOutputXml={testResultsDirectory}"),
+            }
 
             var processBit = buildContext.Tests.ProcessBit.ToLower();
             if (!string.IsNullOrWhiteSpace(processBit))
@@ -167,7 +181,7 @@ private static void RunUnitTests(BuildContext buildContext, string projectName)
         {
             buildContext.CakeContext.Information("Project '{0}' is a .NET project, using '{1} runner' to run the unit tests", projectName, buildContext.Tests.Framework);
 
-            if (buildContext.Tests.Framework.ToLower().Equals("nunit"))
+            if (IsNUnitTestProject(buildContext, projectName))
             {
                 RunTestsUsingNUnit(buildContext, projectName, testTargetFramework, testResultsDirectory);
 
@@ -194,6 +208,38 @@ private static void RunUnitTests(BuildContext buildContext, string projectName)
     {
         buildContext.CakeContext.Warning("No tests were executed, check whether the used test framework '{0}' is available", buildContext.Tests.Framework);
     }
+}
+
+//-------------------------------------------------------------
+
+private static bool IsNUnitTestProject(BuildContext buildContext, string projectName)
+{
+    var projectFileName = GetProjectFileName(buildContext, projectName);
+    var projectFileContents = System.IO.File.ReadAllText(projectFileName);
+
+    if (projectFileContents.ToLower().Contains("nunit"))
+    {
+        return true;
+    }
+
+    // Not sure, return framework from config
+    return buildContext.Tests.Framework.ToLower().Equals("nunit");
+}
+
+//-------------------------------------------------------------
+
+private static bool IsXUnitTestProject(BuildContext buildContext, string projectName)
+{
+    var projectFileName = GetProjectFileName(buildContext, projectName);
+    var projectFileContents = System.IO.File.ReadAllText(projectFileName);
+
+    if (projectFileContents.ToLower().Contains("xunit"))
+    {
+        return true;
+    }
+
+    // Not sure, return framework from config
+    return buildContext.Tests.Framework.ToLower().Equals("xunit");
 }
 
 //-------------------------------------------------------------
