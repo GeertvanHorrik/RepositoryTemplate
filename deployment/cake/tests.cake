@@ -106,9 +106,9 @@ public class TestProcessor : ProcessorBase
         //
         // In both cases, we can simply remove ".Tests" and check if that project is being ignored
         var expectedProjectName = projectName
-            .Replace(".Tests", string.Empty)
             .Replace(".Integration.Tests", string.Empty)
-            .Replace(".IntegrationTests", string.Empty);
+            .Replace(".IntegrationTests", string.Empty)
+            .Replace(".Tests", string.Empty);
 
         if (!ShouldProcessProject(BuildContext, expectedProjectName))
         {

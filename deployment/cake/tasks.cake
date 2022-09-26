@@ -302,6 +302,12 @@ Task("Prepare")
     // Add to the front, these are dependencies after all
     buildContext.AllProjects.InsertRange(0, buildContext.Dependencies.Items);
 
+    // Now we have the full collection, distinct
+    var allProjects = buildContext.AllProjects.ToArray();
+
+    buildContext.AllProjects.Clear();
+    buildContext.AllProjects.AddRange(allProjects.Distinct());
+
     buildContext.CakeContext.LogSeparator("Final projects to process");
 
     foreach (var item in buildContext.AllProjects.ToList())

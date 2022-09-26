@@ -9,41 +9,37 @@ public class ContinuaCIBuildServer : BuildServerBase
     
     public override async Task OnTestFailedAsync()
     {
-        await ImportNUnitTestFilesAsync();
-        await ImportXUnitTestFilesAsync(); 
+        await ImportUnitTestsAsync();
     }
 
     //-------------------------------------------------------------
 
     public override async Task AfterTestAsync()
     {
-        await ImportNUnitTestFilesAsync();
-        await ImportXUnitTestFilesAsync();
+        await ImportUnitTestsAsync();
     }
 
     //-------------------------------------------------------------
 
-    private async Task ImportNUnitTestFilesAsync()
+    private async Task ImportUnitTestsAsync()
     {
-        await ImportTestFilesAsync("nunit");
+        foreach (var project in BuildContext.Tests.Items)
+        {
+            await ImportTestFilesAsync(project);
+        }
     }
 
     //-------------------------------------------------------------
 
-    private async Task ImportXUnitTestFilesAsync()
-    {
-        await ImportTestFilesAsync("xunit");
-    }
-
-    //-------------------------------------------------------------
-
-    private async Task ImportTestFilesAsync(string type)
+    private async Task ImportTestFilesAsync(string projectName)
     {
         var continuaCIContext = GetContinuaCIContext();
         if (!continuaCIContext.IsRunningOnContinuaCI)
         {
             return;
         }
+
+        CakeContext.Warning($"Importing test results for '{projectName}'");
 
         var testResultsDirectory = System.IO.Path.Combine(BuildContext.General.OutputRootDirectory, "testresults");
 
@@ -53,7 +49,26 @@ public class ContinuaCIBuildServer : BuildServerBase
             return;
         }
 
-        var cakeFilePattern =  System.IO.Path.Combine(testResultsDirectory, "**", "*.xml");
+        var type = string.Empty;
+
+        if (IsNUnitTestProject(BuildContext, projectName))
+        {
+            type = "nunit";
+        }
+        else if (IsXUnitTestProject(BuildContext, projectName))
+        {
+            type = "xunit";
+        }
+
+        if (string.IsNullOrWhiteSpace(type))
+        {
+            CakeContext.Warning("Could not find test project type");
+            return;
+        }
+
+        var cakeFilePattern =  System.IO.Path.Combine(testResultsDirectory, projectName, "*.xml");
+
+        CakeContext.Warning($"Using pattern '{cakeFilePattern}'");
 
         var testResultsFiles = CakeContext.GetFiles(cakeFilePattern);
         if (!testResultsFiles.Any())
