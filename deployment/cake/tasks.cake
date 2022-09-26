@@ -74,6 +74,7 @@ public class BuildContext : BuildContextBase
     {
         Processors = new List<IProcessor>();
         AllProjects = new List<string>();
+        RegisteredProjects = new List<string>();
         Variables = new Dictionary<string, string>();  
     }
 
@@ -106,6 +107,7 @@ public class BuildContext : BuildContextBase
     public WpfContext Wpf { get; set; }
 
     public List<string> AllProjects { get; private set; }
+    public List<string> RegisteredProjects { get; private set; }
 
     protected override void ValidateContext()
     {
@@ -235,6 +237,18 @@ Task("Initialize")
 Task("Prepare")
     .Does<BuildContext>(async buildContext =>
 {
+    // Add all projects to registered projects
+    buildContext.RegisteredProjects.AddRange(buildContext.Components.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.Dependencies.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.DockerImages.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.GitHubPages.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.Tests.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.Tools.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.Uwp.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.VsExtensions.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.Web.Items);
+    buildContext.RegisteredProjects.AddRange(buildContext.Wpf.Items);
+
     await buildContext.BuildServer.BeforePrepareAsync();
 
     foreach (var processor in buildContext.Processors)
