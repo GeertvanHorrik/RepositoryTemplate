@@ -516,11 +516,66 @@ Task("Test")
 
     await buildContext.SourceControl.MarkBuildAsPendingAsync("Test");
     
-    foreach (var testProject in buildContext.Tests.Items)
+    if (buildContext.Tests.Items.Count > 0)
     {
-        buildContext.CakeContext.LogSeparator("Running tests for '{0}'", testProject);
+        // If docker is involved, login to all registries for the unit / integration tests
+        var dockerRegistries = new HashSet<string>();
+        var dockerProcessor = (DockerImagesProcessor)buildContext.Processors.Single(x => x is DockerImagesProcessor);
 
-        RunUnitTests(buildContext, testProject);
+        try
+        {
+            foreach (var dockerImage in buildContext.DockerImages.Items)
+            {       
+                var dockerRegistryUrl = dockerProcessor.GetDockerRegistryUrl(dockerImage);
+                if (dockerRegistries.Contains(dockerRegistryUrl))
+                {
+                    continue;
+                }
+
+                // Note: we are logging in each time because the registry might be different per container
+                Information($"Logging in to docker @ '{dockerRegistryUrl}'");
+
+                dockerRegistries.Add(dockerRegistryUrl);
+
+                var dockerRegistryUserName = dockerProcessor.GetDockerRegistryUserName(dockerImage);
+                var dockerRegistryPassword = dockerProcessor.GetDockerRegistryPassword(dockerImage);
+
+                var dockerLoginSettings = new DockerRegistryLoginSettings
+                {
+                    Username = dockerRegistryUserName,
+                    Password = dockerRegistryPassword
+                };
+
+                DockerLogin(dockerLoginSettings, dockerRegistryUrl);
+            }
+
+            foreach (var testProject in buildContext.Tests.Items)
+            {
+                buildContext.CakeContext.LogSeparator("Running tests for '{0}'", testProject);
+
+                RunUnitTests(buildContext, testProject);
+            }
+        }
+        finally
+        {
+            foreach (var dockerRegistry in dockerRegistries)
+            {
+                try
+                {
+                    Information($"Logging out of docker @ '{dockerRegistry}'");
+
+                    var dockerLogoutSettings = new DockerRegistryLogoutSettings
+                    {
+                    };
+
+                    DockerLogout(dockerLogoutSettings, dockerRegistry);
+                }
+                catch (Exception ex)
+                {
+                    Warning($"Failed to logout from docker: {ex.Message}");
+                }
+            }
+        }
     }
 
     await buildContext.SourceControl.MarkBuildAsSucceededAsync("Test");
