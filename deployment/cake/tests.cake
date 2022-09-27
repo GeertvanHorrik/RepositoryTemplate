@@ -160,11 +160,13 @@ private static void RunUnitTests(BuildContext buildContext, string projectName)
                 dotNetTestSettings.ArgumentCustomization = args => args
                     .Append($"-- NUnit.TestOutputXml={testResultsDirectory}");
             }
-
+            
             if (IsXUnitTestProject(buildContext, projectName))
             {
-                // dotNetTestSettings.ArgumentCustomization = args => args
-                //     .Append($"-- XUnit.TestOutputXml={testResultsDirectory}"),
+                var outputFileName = System.IO.Path.Combine(testResultsDirectory, $"{projectName}.xml");
+
+                dotNetTestSettings.ArgumentCustomization = args => args
+                    .Append($"-l:trx;LogFileName={outputFileName}");
             }
 
             var processBit = buildContext.Tests.ProcessBit.ToLower();
@@ -222,8 +224,10 @@ private static bool IsNUnitTestProject(BuildContext buildContext, string project
         return true;
     }
 
+    return false;
+
     // Not sure, return framework from config
-    return buildContext.Tests.Framework.ToLower().Equals("nunit");
+    //return buildContext.Tests.Framework.ToLower().Equals("nunit");
 }
 
 //-------------------------------------------------------------
@@ -238,8 +242,10 @@ private static bool IsXUnitTestProject(BuildContext buildContext, string project
         return true;
     }
 
+    return false;
+
     // Not sure, return framework from config
-    return buildContext.Tests.Framework.ToLower().Equals("xunit");
+    //return buildContext.Tests.Framework.ToLower().Equals("xunit");
 }
 
 //-------------------------------------------------------------
