@@ -203,6 +203,30 @@
     <Page Include="Platforms\net\**\*.xaml" SubType="Designer" Generator="MSBuild:Compile" />
     <Compile Update="Platforms\net\**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
   </ItemGroup>
+  
+  <!-- .NET 7.0 -->
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net7.0')) ">
+    <DefineConstants>$(DefineConstants);NETCORE;NETCORE7;NETCORE7_0;NET7;NET7_0</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net7.0')) ">
+    <None Remove="Platforms\net\**\*.cs;Platforms\net\**\*.xaml;Platforms\net\**\*.xaml.cs" />
+    <Compile Include="Platforms\net\**\*.cs" DependentUpon="%(Filename)" />
+    <Page Include="Platforms\net\**\*.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Compile Update="Platforms\net\**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
+  </ItemGroup>
+  
+  <!-- .NET 8.0 -->
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net8.0')) ">
+    <DefineConstants>$(DefineConstants);NETCORE;NETCORE8;NETCORE8_0;NET8;NET8_0</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net8.0')) ">
+    <None Remove="Platforms\net\**\*.cs;Platforms\net\**\*.xaml;Platforms\net\**\*.xaml.cs" />
+    <Compile Include="Platforms\net\**\*.cs" DependentUpon="%(Filename)" />
+    <Page Include="Platforms\net\**\*.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Compile Update="Platforms\net\**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
+  </ItemGroup>
 
   <!-- .NET Standard 2.0 -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
