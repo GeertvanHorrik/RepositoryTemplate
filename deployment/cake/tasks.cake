@@ -275,7 +275,7 @@ Task("Prepare")
     buildContext.AllProjects.AddRange(buildContext.Web.Items);
     buildContext.AllProjects.AddRange(buildContext.Wpf.Items);
 
-    buildContext.CakeContext.LogSeparator("Final check which test projects should be included");
+    buildContext.CakeContext.LogSeparator("Final check which test projects should be included (1/2)");
 
     // Once we know all the projects that will be built, we calculate which
     // test projects need to be built as well
@@ -294,7 +294,7 @@ Task("Prepare")
 
     buildContext.AllProjects.AddRange(buildContext.Tests.Items);
 
-    buildContext.CakeContext.LogSeparator("Final check which dependencies should be included");
+    buildContext.CakeContext.LogSeparator("Final check which dependencies should be included (2/2)");
 
     // Now we really really determined all projects to build, we can check the dependencies
     var dependenciesProcessor = (DependenciesProcessor)buildContext.Processors.First(x => x is DependenciesProcessor);
