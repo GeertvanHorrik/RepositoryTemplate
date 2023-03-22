@@ -45,8 +45,8 @@
 		Also make sure to not use this when in in Docker and Debug
     -->
 
-    <OutputPath Condition=" ('$(DockerDefaultTargetOS)' == '' AND '$(Configuration)'=='Debug') AND ('$(OverridableOutputPath)' != '$(__OverridableOutputPathDefault)') ">$(OverridableOutputPath)\..\$(MSBuildProjectName)\</OutputPath>
-    <OutputPath Condition=" ('$(DockerDefaultTargetOS)' == '' AND '$(Configuration)'=='Debug') AND ('$(OverridableOutputPath)' == '$(__OverridableOutputPathDefault)') ">$(OverridableOutputPath)</OutputPath>
+    <OutputPath Condition=" ('$(DockerDefaultTargetOS)' == '' OR '$(Configuration)'!='Debug') AND ('$(OverridableOutputPath)' != '$(__OverridableOutputPathDefault)') ">$(OverridableOutputPath)\..\$(MSBuildProjectName)\</OutputPath>
+    <OutputPath Condition=" ('$(DockerDefaultTargetOS)' == '' OR '$(Configuration)'!='Debug') AND ('$(OverridableOutputPath)' == '$(__OverridableOutputPathDefault)') ">$(OverridableOutputPath)</OutputPath>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   
