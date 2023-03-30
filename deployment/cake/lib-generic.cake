@@ -578,21 +578,16 @@ private static bool ShouldProcessProject(BuildContext buildContext, string proje
         return true;
     }
 
-    if (ShouldBuildProject(buildContext, projectName))
-    {
-        // Always build
-        return true;
-    }
-
     // Experimental mode where we ignore projects that are not on the deploy list when not in CI mode, but
     // it can only work if they are not part of unit tests (but that should never happen)
     // if (buildContext.Tests.Items.Count == 0)
     // {
         if (checkDeployment && 
+            !ShouldBuildProject(buildContext, projectName) &&
             !ShouldPackageProject(buildContext, projectName) && 
             !ShouldDeployProject(buildContext, projectName))
         {
-            buildContext.CakeContext.Warning("Project '{0}' should not be processed because this is not a CI build, does not contain tests and the project should not be deployed, removing from projects to process", projectName);
+            buildContext.CakeContext.Warning("Project '{0}' should not be processed because this is not a CI build, does not contain tests and the project should not be built, packaged or deployed, removing from projects to process", projectName);
             return false;
         }
     //}
@@ -641,10 +636,16 @@ private static bool ShouldBuildProject(BuildContext buildContext, string project
     var slug = GetProjectSlug(projectName);
     var keyToCheck = string.Format("Build{0}", slug);
 
-    // By default, everything should be built. This is to explicitly not build
-    // a project when a solution contains multiple projects / components that
+    // No need to build if we don't package
+    var shouldBuild = ShouldPackageProject(buildContext, projectName);
+
+    // By default, everything should be built. This feature is to explicitly not include
+    // a project in the build when a solution contains multiple projects / components that
     // need to be built / packaged / deployed separately
-    var shouldBuild = buildContext.BuildServer.GetVariableAsBool(keyToCheck, true);
+    //
+    // The default value is "ShouldPackageProject" since we assume it does not need
+    // to be built if it's not supposed to be packaged
+    shouldBuild = buildContext.BuildServer.GetVariableAsBool(keyToCheck, shouldBuild);
 
     buildContext.CakeContext.Information($"Value for '{keyToCheck}': {shouldBuild}");
 
@@ -659,13 +660,12 @@ private static bool ShouldPackageProject(BuildContext buildContext, string proje
     var slug = GetProjectSlug(projectName);
     var keyToCheck = string.Format("Package{0}", slug);
 
-    // Can't package if not built
-    if (!ShouldBuildProject(buildContext, projectName))
-    {
-        return false;
-    }
+    // No need to package if we don't deploy
+    var shouldPackage = ShouldDeployProject(buildContext, projectName);
 
-    var shouldPackage = buildContext.BuildServer.GetVariableAsBool(keyToCheck, true);
+    // The default value is "ShouldDeployProject" since we assume it does not need
+    // to be packaged if it's not supposed to be deployed
+    shouldPackage = buildContext.BuildServer.GetVariableAsBool(keyToCheck, shouldPackage);
 
     // If this is *only* a dependency, it should never be deployed
     if (IsOnlyDependencyProject(buildContext, projectName))
@@ -693,12 +693,7 @@ private static bool ShouldDeployProject(BuildContext buildContext, string projec
     var slug = GetProjectSlug(projectName);
     var keyToCheck = string.Format("Deploy{0}", slug);
 
-    // Can't deploy if not packaged
-    if (!ShouldPackageProject(buildContext, projectName))
-    {
-        return false;
-    }
-
+    // By default, deploy
     var shouldDeploy = buildContext.BuildServer.GetVariableAsBool(keyToCheck, true);
 
     // If this is *only* a dependency, it should never be deployed
