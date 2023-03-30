@@ -641,9 +641,10 @@ private static bool ShouldBuildProject(BuildContext buildContext, string project
     var slug = GetProjectSlug(projectName);
     var keyToCheck = string.Format("Build{0}", slug);
 
-    // Note: we return false by default. This method is only used to explicitly
-    // force a build even when a project is not deployable
-    var shouldBuild = buildContext.BuildServer.GetVariableAsBool(keyToCheck, false);
+    // By default, everything should be built. This is to explicitly not build
+    // a project when a solution contains multiple projects / components that
+    // need to be built / packaged / deployed separately
+    var shouldBuild = buildContext.BuildServer.GetVariableAsBool(keyToCheck, true);
 
     buildContext.CakeContext.Information($"Value for '{keyToCheck}': {shouldBuild}");
 
