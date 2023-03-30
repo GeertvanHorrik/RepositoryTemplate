@@ -658,6 +658,12 @@ private static bool ShouldPackageProject(BuildContext buildContext, string proje
     var slug = GetProjectSlug(projectName);
     var keyToCheck = string.Format("Package{0}", slug);
 
+    // Can't package if not built
+    if (!ShouldBuildProject(buildContext, projectName))
+    {
+        return false;
+    }
+
     var shouldPackage = buildContext.BuildServer.GetVariableAsBool(keyToCheck, true);
 
     // If this is *only* a dependency, it should never be deployed
@@ -685,6 +691,12 @@ private static bool ShouldDeployProject(BuildContext buildContext, string projec
     // Allow the build server to configure this via "Deploy[ProjectName]"
     var slug = GetProjectSlug(projectName);
     var keyToCheck = string.Format("Deploy{0}", slug);
+
+    // Can't deploy if not packaged
+    if (!ShouldPackageProject(buildContext, projectName))
+    {
+        return false;
+    }
 
     var shouldDeploy = buildContext.BuildServer.GetVariableAsBool(keyToCheck, true);
 
