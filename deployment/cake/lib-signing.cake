@@ -4,17 +4,18 @@ private static string _signToolFileName;
 
 public static bool ShouldSignImmediately(BuildContext buildContext, string projectName)
 {
+	// Sometimes unit tests require signed assemblies, but only sign immediately when it's in the list
+    if (buildContext.CodeSigning.ProjectsToSignImmediately.Contains(projectName))
+    {   
+        buildContext.CakeContext.Information($"Immediately code signing '{projectName}' files");
+        return true;
+    }
+
     if (buildContext.General.IsLocalBuild ||
         buildContext.General.IsCiBuild)
     {
         // Never code-sign local or ci builds
         return false;
-    }
-
-    if (buildContext.CodeSigning.ProjectsToSignImmediately.Contains(projectName))
-    {   
-        buildContext.CakeContext.Information($"Immediately code signing '{projectName}' files");
-        return true;
     }
 
     return false;
