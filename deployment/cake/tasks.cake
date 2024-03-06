@@ -397,9 +397,9 @@ Task("Build")
             sonarSettings.Login = buildContext.General.SonarQube.Username;
         }
 
-        if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Password))
+        if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Token))
         {
-            sonarSettings.Password = buildContext.General.SonarQube.Password;
+            sonarSettings.Token = buildContext.General.SonarQube.Token;
         }
 
         // see https://cakebuild.net/api/Cake.Sonar/SonarBeginSettings/ for more information on
@@ -450,7 +450,7 @@ Task("Build")
             {
                 await buildContext.SourceControl.MarkBuildAsPendingAsync("SonarQube");
 
-                var sonarEndSettings = new SonarEndSettings
+                var sonarSettings = new SonarEndSettings
                 {
                     // Use core clr version of SonarQube
                     UseCoreClr = true
@@ -458,17 +458,17 @@ Task("Build")
 
                 if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Username))
                 {
-                    sonarEndSettings.Login = buildContext.General.SonarQube.Username;
+                    sonarSettings.Login = buildContext.General.SonarQube.Username;
                 }
 
-                if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Password))
+                if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Token))
                 {
-                    sonarEndSettings.Password = buildContext.General.SonarQube.Password;
+                    sonarSettings.Token = buildContext.General.SonarQube.Token;
                 }
 
                 Information("Ending SonarQube");
 
-                SonarEnd(sonarEndSettings);
+                SonarEnd(sonarSettings);
 
                 await buildContext.SourceControl.MarkBuildAsSucceededAsync("SonarQube");
             }
