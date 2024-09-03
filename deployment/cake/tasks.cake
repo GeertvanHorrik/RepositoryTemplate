@@ -382,9 +382,9 @@ Task("Build")
             Verbose = false,
             Silent = true,
 
-            // Support waiting for the quality gate
             ArgumentCustomization = args => args
                 .Append("/d:sonar.qualitygate.wait=true")
+                .Append("/d:sonar.scanner.scanAll=false")
         };
 
         if (!string.IsNullOrWhiteSpace(buildContext.General.SonarQube.Organization))
