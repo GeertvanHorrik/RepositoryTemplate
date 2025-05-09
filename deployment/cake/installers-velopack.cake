@@ -102,7 +102,17 @@ public class VelopackInstaller : IInstaller
             .AppendSwitch("--delta", "BestSpeed")
             .AppendSwitch("--outputDir", velopackReleasesRoot);
 
-        // TODO: Consider adding splash image
+        // Note: for now BIG assumption that the exe is the same as project name
+        argumentBuilder = argumentBuilder
+            .AppendSwitch("--mainExe", $"{projectName}.exe")
+
+        // (Animated) splash image
+        var splashImageFileName = System.IO.Path.Combine(".", "deployment", "velopack", "splash.gif");
+        if (System.IO.File.Exists(splashImageFileName))
+        {
+            argumentBuilder = argumentBuilder
+                .AppendSwitch("--splashImage", splashImageFileName);
+        }
 
         // Note: this is not really generic, but this is where we store our icons file, we can
         // always change this in the future
