@@ -161,3 +161,4 @@ package-lock.json
 
 # Azure / .NET Aspire
 .azure
+infra/
