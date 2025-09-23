@@ -79,6 +79,12 @@ private static void ConfigureMsBuild(BuildContext buildContext, MSBuildSettings 
     // msBuildSettings.WithProperty("SolutionExt", ".sln");
     // msBuildSettings.WithProperty("DefineExplicitDefaults", "true");
 
+    // Path maps
+    if (!buildContext.General.IsLocalBuild)
+    {
+        msBuildSettings.WithProperty("PathMap", $"{buildContext.General.RootDirectory}=./");
+    }
+
     // Disable copyright info
     msBuildSettings.NoLogo = true;
 
@@ -155,6 +161,12 @@ private static void ConfigureMsBuildForDotNet(BuildContext buildContext, DotNetM
     // msBuildSettings.WithProperty("SolutionName", buildContext.General.Solution.Name);
     // msBuildSettings.WithProperty("SolutionExt", ".sln");
     // msBuildSettings.WithProperty("DefineExplicitDefaults", "true");
+
+    // Path maps
+    if (!buildContext.General.IsLocalBuild)
+    {
+        msBuildSettings.WithProperty("PathMap", $"{buildContext.General.RootDirectory}=./");
+    }
 
     // Disable copyright info
     msBuildSettings.NoLogo = true;
