@@ -1,4 +1,8 @@
 name: dependabot-cake
+
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   schedule:
