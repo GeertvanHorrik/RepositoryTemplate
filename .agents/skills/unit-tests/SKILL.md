@@ -150,6 +150,8 @@ public async Task Created_Serializer_Produces_Valid_Json()
 #### Coding practices
 - Namespaces are considered "feature containers". Don't add specific folder names to namespaces such as '.Models', '.Exceptions', '.EventArgs', '.Interfaces', '.Services'
 
+For further coding practices, see the `code-writer` skill.
+
 #### Example
 ```csharp
 public class ConfigurationServiceFacts
