@@ -22,6 +22,7 @@ Produce small, focused pull requests â€” a maximum of **25 new tests per PR** â€
   - Error paths (expected exceptions)
 - Keep each PR limited to **10 new test methods** to stay reviewable.
 - Use partial classes and partial files to split large test fixtures when a single testable type accumulates too many tests.
+- Prefer separate files for classes and do not combine multiple classes into a single file.
 - Maintain consistent naming, formatting, and structure across all test files.
 
 ---
