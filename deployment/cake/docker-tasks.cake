@@ -54,7 +54,7 @@ public class DockerImagesProcessor : ProcessorBase
 
         imageName += projectName.Replace(".", "-");
 
-        if (imageName.EndsWith("service"))
+        if (imageName.EndsWith("service", StringComparison.OrdinalIgnoreCase))
         {
             imageName = imageName.Substring(0, imageName.Length - "service".Length);
         }
